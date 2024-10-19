@@ -2,20 +2,20 @@ const sql = require('mssql');
 const bcrypt = require('bcrypt');
 const dbConfig = require('../config/dbConfig');
 
-//Endpoint para obtener las colonias 
-const obtenerColonias = async (req, res) => {
+//Endpoint para obtener los departamentos
+const obtenerDepartamentos = async (req, res) => {
     try {
         // Crear una conexión a SQL Server
         const pool = await sql.connect(dbConfig);
 
         // Ejecutar la consulta para obtener las colonias
-        const result = await pool.request().query('SELECT Id_colonia, Nombre FROM Colonias');
+        const result = await pool.request().query('SELECT Id_departamento, Nombre FROM Departamentos');
         
         // Devolver el resultado de la consulta
         res.json(result.recordset);
     } catch (error) {
-        console.error('Error al obtener colonias:', error);
-        res.status(500).send('Error al obtener las colonias');
+        console.error('Error al obtener departamentos:', error);
+        res.status(500).send('Error al obtener los departamentos');
     }
 };
 // agregar cliente
@@ -140,4 +140,4 @@ const eliminarCliente = async (req, res) => {
         res.status(500).send('Error al eliminar el cliente');
     }
 };
-module.exports = { obtenerColonias, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente };
+module.exports = { obtenerDepartamentos, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente };

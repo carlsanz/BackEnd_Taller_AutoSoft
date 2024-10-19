@@ -1,5 +1,5 @@
 const express = require('express');
-const { obtenerColonias,
+const { obtenerDepartamentos,
     agregarCliente,
     buscarClientePorIdentidad,
     actualizarCliente,
@@ -11,8 +11,8 @@ const router = express.Router();
 //ruta para agregar cliente
 router.post('/clientes', agregarCliente);
 
-//ruta para obtener colonias
-router.get('/colonias', obtenerColonias);
+//ruta para obtener departamentos
+router.get('/departamentos', obtenerDepartamentos);
 
 //ruta para buscar cliente por identidad
 router.get('/clientes/:identidad', buscarClientePorIdentidad);

@@ -35,24 +35,24 @@ app.listen(PORT, () => {
 //nueva_contraseña
 
 
-// async function crearUsuarios() {
-//   try {
-//       const pool = await sql.connect(dbConfig); // Asegúrate de que dbConfig esté definido correctamente
-//       const hashedPassword = await bcrypt.hash('nueva_contraseña', 10); // Cambia 'nueva_contraseña' según sea necesario
-//
-//       await pool.request()
-//           .input('Nombre', sql.NVarChar, 'Admin User')
-//           .input('Email', sql.NVarChar, 'admin@example.com')
-//           .input('Contraseña', sql.NVarChar, hashedPassword)
-//           .input('Rol', sql.NVarChar, 'Administrador')
-//           .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol) VALUES (@Nombre, @Email, @Contraseña, @Rol)');
-//
-//       console.log('Usuario creado exitosamente');
-//   } catch (error) {
-//       console.error('Error al crear usuario:', error);
-//   }
-// }
-//
-// crearUsuarios();
+/* async function crearUsuarios() {
+   try {
+       const pool = await sql.connect(dbConfig); // Asegúrate de que dbConfig esté definido correctamente
+       const hashedPassword = await bcrypt.hash('nueva_contraseña', 10); // Cambia 'nueva_contraseña' según sea necesario
 
+       await pool.request()
+           .input('Nombre', sql.NVarChar, 'Admin User')
+           .input('Email', sql.NVarChar, 'admin@example.com')
+           .input('Contraseña', sql.NVarChar, hashedPassword)
+           .input('Rol', sql.NVarChar, 'Administrador')
+           .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol) VALUES (@Nombre, @Email, @Contraseña, @Rol)');
+
+       console.log('Usuario creado exitosamente');
+   } catch (error) {
+       console.error('Error al crear usuario:', error);
+   }
+ }
+
+ crearUsuarios();
+*/
 
