@@ -2,6 +2,7 @@ const sql = require('mssql');
 const bcrypt = require('bcrypt');
 const dbConfig = require('../config/dbConfig'); 
 
+
 // Controlador para el login
 const login = async (req, res) => {
     const { email, password } = req.body;
