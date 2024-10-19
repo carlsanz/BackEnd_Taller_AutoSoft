@@ -29,7 +29,7 @@ const agregarCliente = async (req, res) => {
         // Insertar una nueva persona en la tabla Personas
         await pool.request()
             .input('Identidad', sql.NVarChar, Identidad)
-            .input('Id_colonia', sql.Int, Id_colonia)
+            .input('Id_departamento', sql.Int, Id_colonia)
             .input('P_nombre', sql.NVarChar, P_nombre)
             .input('S_nombre', sql.NVarChar, S_nombre || null)
             .input('P_apellido', sql.NVarChar, P_apellido)
@@ -40,8 +40,8 @@ const agregarCliente = async (req, res) => {
             .input('correo', sql.NVarChar, correo)
             .input('Genero', sql.NVarChar, Genero)
             .query(`
-                INSERT INTO Personas (Identidad, Id_colonia, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero) 
-                VALUES (@Identidad, @Id_colonia, @P_nombre, @S_nombre, @P_apellido, @S_apellido, @Direccion, @Telefono, @Fecha_nac, @correo, @Genero)
+                INSERT INTO Personas (Identidad, Id_departamento, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero) 
+                VALUES (@Identidad, @Id_departamento, @P_nombre, @S_nombre, @P_apellido, @S_apellido, @Direccion, @Telefono, @Fecha_nac, @correo, @Genero)
             `);
 
         res.status(201).send('Cliente agregado exitosamente');
@@ -89,7 +89,7 @@ const actualizarCliente = async (req, res) => {
 
         await pool.request()
             .input('Identidad', sql.NVarChar, identidad)
-            .input('Id_colonia', sql.Int, Id_colonia)
+            .input('Id_departamento', sql.Int, Id_departamento)
             .input('P_nombre', sql.NVarChar, P_nombre)
             .input('S_nombre', sql.NVarChar, S_nombre || null)
             .input('P_apellido', sql.NVarChar, P_apellido)
@@ -101,7 +101,7 @@ const actualizarCliente = async (req, res) => {
             .input('Genero', sql.NVarChar, Genero)
             .query(`
                 UPDATE Personas SET
-                    Id_colonia = @Id_colonia,
+                    Id_departamento = @Id_departamento,
                     P_nombre = @P_nombre,
                     S_nombre = @S_nombre,
                     P_apellido = @P_apellido,
