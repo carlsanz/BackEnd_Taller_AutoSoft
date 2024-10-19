@@ -21,7 +21,7 @@ const obtenerDepartamentos = async (req, res) => {
 // agregar cliente
 
 const agregarCliente = async (req, res) => {
-    const { Identidad, Id_colonia, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero } = req.body;
+    const { Identidad, Id_departamento, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero } = req.body;
 
     try {
         const pool = await sql.connect(dbConfig);
@@ -29,7 +29,7 @@ const agregarCliente = async (req, res) => {
         // Insertar una nueva persona en la tabla Personas
         await pool.request()
             .input('Identidad', sql.NVarChar, Identidad)
-            .input('Id_departamento', sql.Int, Id_colonia)
+            .input('Id_departamento', sql.Int, Id_departamento)
             .input('P_nombre', sql.NVarChar, P_nombre)
             .input('S_nombre', sql.NVarChar, S_nombre || null)
             .input('P_apellido', sql.NVarChar, P_apellido)
@@ -82,7 +82,7 @@ const buscarClientePorIdentidad = async (req, res) => {
 // funcion para actualizar cliente 
 const actualizarCliente = async (req, res) => {
     const { identidad } = req.params;
-    const { Id_colonia, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero } = req.body;
+    const { Id_departamento, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero } = req.body;
 
     try {
         const pool = await sql.connect(dbConfig);
