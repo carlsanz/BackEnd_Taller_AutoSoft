@@ -4,11 +4,8 @@ const express = require('express');
 const sql = require('mssql');
 const authRoutes = require('./routes/auth'); // Importar las rutas de autenticación
 const agregarUsuarioRoutes = require('./routes/agregarUsuario');
-const changePasswordRoutes = require('./routes/changePasswordRoutes');
-
 const dbConfig = require('./config/dbConfig'); // Asegúrate de importar tu configuración de DB
 const cors = require('cors');
-
 
 
 
@@ -17,9 +14,7 @@ app.use(cors()); // Middleware de CORS debe estar antes de las rutas
 app.use(express.json()); // Middleware para parsear el JSON
 
 app.use('/auth', authRoutes); // Usar las rutas de autenticación
-app.use('/usuarios', agregarUsuarioRoutes);// ruta para agregar usuario
-app.use('/api/password', changePasswordRoutes); //ruta para cambio de contraseña
-
+app.use('/usuarios', agregarUsuarioRoutes);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
@@ -28,7 +23,7 @@ app.listen(PORT, () => {
 });
 
 
-////Mecanico
+//Mecanico
 //carsan@gmail.com
 //asdf1234
 
@@ -40,7 +35,7 @@ app.listen(PORT, () => {
 // async function crearUsuarios() {
 //   try {
 //       const pool = await sql.connect(dbConfig); // Asegúrate de que dbConfig esté definido correctamente
-//       const hashedPassword = await bcrypt.hash('nueva_contraseña', 10); // Cambia 'nueva_contraseña' según sea necesario
+//       const hashedPassword = await bcrypt.hash('asdf1234', 10); // Cambia 'nueva_contraseña' según sea necesario
 
 //       await pool.request()
 //           .input('Nombre', sql.NVarChar, 'Admin User')
