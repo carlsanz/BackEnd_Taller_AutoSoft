@@ -24,7 +24,7 @@ app.use('/api', clientesRoutes);
 
 
 
-app.use('/usuarios', usuarioRoutes); // Esta línea ahora debe funcionar correctamente
+app.use('/usuarios-completo', usuarioRoutes); // Esta línea ahora debe funcionar correctamente
 
 
 // Iniciar el servidor
