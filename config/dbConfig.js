@@ -3,12 +3,12 @@ const sql = require('mssql');
 const dbConfig = {
     user: 'sa',
     password: 'Man7equ!lla',
-    server: 'DESKTOP-P8RVH97', // Usa solo el nombre de la máquina
+    server: 'DESKTOP-P8RVH97', 
     database: 'TallerMecanico',
     options: {
     
-        encrypt: true, // O false según tu configuración
-        trustServerCertificate: true // O false según tu configuración
+        encrypt: true, 
+        trustServerCertificate: true 
     }
   };
   

@@ -1,10 +1,12 @@
 const sql = require('mssql');
 const bcrypt = require('bcrypt');
 const dbConfig = require('../config/dbConfig');
-// Controlador para agregar un nuevo usuario solo permitido agregar a administradores
+
+
 const agregarUsuario = async (req, res) => {
     const { nombre, email, contraseña } = req.body;
-    const rol = 'Mecanico'; // Rol fijo
+    const rol = 'Mecanico'; 
+    const Primer_ingreso = true; 
 
     try {
         const hashedPassword = await bcrypt.hash(contraseña, 10);
@@ -16,7 +18,8 @@ const agregarUsuario = async (req, res) => {
             .input('Email', sql.VarChar, email)
             .input('Contraseña', sql.VarChar, hashedPassword)
             .input('Rol', sql.VarChar, rol)
-            .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol) VALUES (@Nombre, @Email, @Contraseña, @Rol)');
+            .input('Primer_ingreso', sql.Bit, Primer_ingreso) // Agregar el campo firstLogin
+            .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol, Primer_ingreso) VALUES (@Nombre, @Email, @Contraseña, @Rol, @Primer_ingreso)');
 
         res.status(201).json({ message: 'Usuario agregado exitosamente' });
     } catch (error) {

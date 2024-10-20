@@ -12,7 +12,7 @@ exports.adminChangePassword = async (req, res) => {
         const pool = await sql.connect(dbConfig);
 
         
-
+ 
         // Realizar la actualización
         const result = await pool.request()
             .input('email', sql.VarChar, email)
