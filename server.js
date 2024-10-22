@@ -5,6 +5,7 @@ const sql = require('mssql');
 const authRoutes = require('./routes/auth'); // Importar las rutas de autenticación
 const agregarUsuarioRoutes = require('./routes/agregarUsuario');
 const changePasswordRoutes = require('./routes/changePasswordRoutes');
+const agregarUsuarioCompleto= require('./routes/usuarioRoutes');
 const dbConfig = require('./config/dbConfig'); // Asegúrate de importar tu configuración de DB
 const cors = require('cors');
 
@@ -17,6 +18,7 @@ app.use(express.json()); // Middleware para parsear el JSON
 app.use('/auth', authRoutes); // Usar las rutas de autenticación
 app.use('/usuarios', agregarUsuarioRoutes);
 app.use('/api/password', changePasswordRoutes); 
+app.use('/usuarios-completo', agregarUsuarioCompleto);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
