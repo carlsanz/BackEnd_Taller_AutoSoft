@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth'); // Importar las rutas de autenticac
 const agregarUsuarioRoutes = require('./routes/agregarUsuario');
 const changePasswordRoutes = require('./routes/changePasswordRoutes');
 const agregarUsuarioCompleto= require('./routes/usuarioRoutes');
+const clientesRoutes = require('./routes/clientes');
 const dbConfig = require('./config/dbConfig'); // Asegúrate de importar tu configuración de DB
 const cors = require('cors');
 

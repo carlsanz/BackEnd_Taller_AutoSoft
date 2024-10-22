@@ -2,52 +2,75 @@ const sql = require('mssql');
 const bcrypt = require('bcrypt');
 const dbConfig = require('../config/dbConfig');
 
-//Endpoint para obtener las colonias 
-const obtenerColonias = async (req, res) => {
+//Endpoint para obtener los departamentos
+const obtenerDepartamentos = async (req, res) => {
     try {
         // Crear una conexión a SQL Server
         const pool = await sql.connect(dbConfig);
 
         // Ejecutar la consulta para obtener las colonias
-        const result = await pool.request().query('SELECT Id_colonia, Nombre FROM Colonias');
+        const result = await pool.request().query('SELECT Id_departamento, Nombre FROM Departamentos');
         
         // Devolver el resultado de la consulta
         res.json(result.recordset);
     } catch (error) {
-        console.error('Error al obtener colonias:', error);
-        res.status(500).send('Error al obtener las colonias');
+        console.error('Error al obtener departamentos:', error);
+        res.status(500).send('Error al obtener los departamentos');
     }
 };
 // agregar cliente
 
 const agregarCliente = async (req, res) => {
-    const { Identidad, Id_colonia, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero } = req.body;
+    const { Identidad, Id_departamento, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero } = req.body;
 
     try {
         const pool = await sql.connect(dbConfig);
 
-        // Insertar una nueva persona en la tabla Personas
-        await pool.request()
-            .input('Identidad', sql.NVarChar, Identidad)
-            .input('Id_colonia', sql.Int, Id_colonia)
-            .input('P_nombre', sql.NVarChar, P_nombre)
-            .input('S_nombre', sql.NVarChar, S_nombre)
-            .input('P_apellido', sql.NVarChar, P_apellido)
-            .input('S_apellido', sql.NVarChar, S_apellido)
-            .input('Direccion', sql.NVarChar, Direccion)
-            .input('Telefono', sql.NVarChar, Telefono)
-            .input('Fecha_nac', sql.Date, Fecha_nac)
-            .input('correo', sql.NVarChar, correo)
-            .input('Genero', sql.NVarChar, Genero)
-            .query(`
-                INSERT INTO Personas (Identidad, Id_colonia, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero) 
-                VALUES (@Identidad, @Id_colonia, @P_nombre, @S_nombre, @P_apellido, @S_apellido, @Direccion, @Telefono, @Fecha_nac, @correo, @Genero)
-            `);
+        // Iniciar una transacción para asegurar la consistencia de ambas inserciones
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
 
-        res.status(201).send('Cliente agregado exitosamente');
+        try {
+            // Insertar una nueva persona en la tabla Personas
+            await transaction.request()
+                .input('Identidad', sql.NVarChar, Identidad)
+                .input('Id_departamento', sql.Int, Id_departamento)
+                .input('P_nombre', sql.NVarChar, P_nombre)
+                .input('S_nombre', sql.NVarChar, S_nombre || null)
+                .input('P_apellido', sql.NVarChar, P_apellido)
+                .input('S_apellido', sql.NVarChar, S_apellido || null)
+                .input('Direccion', sql.NVarChar, Direccion)
+                .input('Telefono', sql.NVarChar, Telefono)
+                .input('Fecha_nac', sql.Date, Fecha_nac)
+                .input('correo', sql.NVarChar, correo)
+                .input('Genero', sql.NVarChar, Genero)
+                .query(`
+                    INSERT INTO Personas (Identidad, Id_departamento, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero) 
+                    VALUES (@Identidad, @Id_departamento, @P_nombre, @S_nombre, @P_apellido, @S_apellido, @Direccion, @Telefono, @Fecha_nac, @correo, @Genero)
+                `);
+
+            // Insertar el cliente en la tabla Clientes, tomando la identidad insertada en Personas
+            await transaction.request()
+                .input('Identidad', sql.NVarChar, Identidad)
+                .query(`
+                    INSERT INTO Clientes (Identidad) 
+                    VALUES (@Identidad)
+                `);
+
+            // Confirmar ambas inserciones si no hay errores
+            await transaction.commit();
+
+            res.status(201).send('Cliente agregado exitosamente');
+        } catch (error) {
+            // Si hay un error, deshacer ambas inserciones
+            await transaction.rollback();
+            console.error('Error al agregar cliente:', error);
+            res.status(500).send('Error al agregar el cliente');
+        }
+
     } catch (error) {
-        console.error('Error al agregar cliente:', error);
-        res.status(500).send('Error al agregar el cliente');
+        console.error('Error al conectar a la base de datos:', error);
+        res.status(500).send('Error en la conexión a la base de datos');
     }
 };
 
@@ -78,22 +101,21 @@ const buscarClientePorIdentidad = async (req, res) => {
         res.status(500).send('Error al buscar el cliente');
     }
 };
-
 // funcion para actualizar cliente 
 const actualizarCliente = async (req, res) => {
     const { identidad } = req.params;
-    const { Id_colonia, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero } = req.body;
+    const { Id_departamento, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero } = req.body;
 
     try {
         const pool = await sql.connect(dbConfig);
 
         await pool.request()
             .input('Identidad', sql.NVarChar, identidad)
-            .input('Id_colonia', sql.Int, Id_colonia)
+            .input('Id_departamento', sql.Int, Id_departamento)
             .input('P_nombre', sql.NVarChar, P_nombre)
-            .input('S_nombre', sql.NVarChar, S_nombre)
+            .input('S_nombre', sql.NVarChar, S_nombre || null)
             .input('P_apellido', sql.NVarChar, P_apellido)
-            .input('S_apellido', sql.NVarChar, S_apellido)
+            .input('S_apellido', sql.NVarChar, S_apellido || null)
             .input('Direccion', sql.NVarChar, Direccion)
             .input('Telefono', sql.NVarChar, Telefono)
             .input('Fecha_nac', sql.Date, Fecha_nac)
@@ -101,7 +123,7 @@ const actualizarCliente = async (req, res) => {
             .input('Genero', sql.NVarChar, Genero)
             .query(`
                 UPDATE Personas SET
-                    Id_colonia = @Id_colonia,
+                    Id_departamento = @Id_departamento,
                     P_nombre = @P_nombre,
                     S_nombre = @S_nombre,
                     P_apellido = @P_apellido,
@@ -140,4 +162,4 @@ const eliminarCliente = async (req, res) => {
         res.status(500).send('Error al eliminar el cliente');
     }
 };
-module.exports = { obtenerColonias, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente };
+module.exports = { obtenerDepartamentos, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente };
