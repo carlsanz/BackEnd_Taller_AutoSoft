@@ -20,6 +20,7 @@ app.use('/auth', authRoutes); // Usar las rutas de autenticación
 app.use('/usuarios', agregarUsuarioRoutes);
 app.use('/api/password', changePasswordRoutes); 
 app.use('/usuarios-completo', agregarUsuarioCompleto);
+app.use('/api', clientesRoutes);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
