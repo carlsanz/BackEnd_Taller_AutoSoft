@@ -9,8 +9,8 @@ const agregarUsuarioCompleto = async (req, res) => {
     const {
         Identidad, P_nombre, S_nombre, P_apellido, S_apellido,
         Direccion, Telefono, Fecha_nac, Correo, Genero,
-        Nombre, Email, Contraseña, Rol, Ocupacion, Salario, Fecha_contratacion, Id_departamento
-    } = req.body;
+        Nombre, Email, Contraseña, Rol, Ocupacion, Salario, Fecha_contratacion, Id_departamento, Primer_ingreso
+        } = req.body;
 
     console.log(req.body); // Para depuración
 
@@ -62,7 +62,8 @@ const agregarUsuarioCompleto = async (req, res) => {
             .input('Email', sql.NVarChar, Email)
             .input('Contraseña', sql.NVarChar, hashedPassword) // Usar la contraseña hasheada
             .input('Rol', sql.NVarChar, Rol)
-            .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol) OUTPUT INSERTED.Id_usuario VALUES (@Nombre, @Email, @Contraseña, @Rol)');
+            .input('Primer_ingreso', sql.Bit, Primer_ingreso)
+            .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol, Primer_ingreso) OUTPUT INSERTED.Id_usuario VALUES (@Nombre, @Email, @Contraseña, @Rol)');
 
         const idUsuario = resultUsuario.recordset[0].Id_usuario;
 
@@ -139,7 +140,7 @@ const buscarUsuario = async (req, res) => {
 const actualizarUsuario = async (req, res) => {
     const { identidad } = req.params;
     const {
-        Nombre,Email, Contraseña, Rol,
+        Nombre,Email, Contraseña, Rol, Primer_ingreso,
         P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, Genero,
         Ocupacion, Salario, Fecha_contratacion,Id_departamento
     } = req.body;
@@ -156,11 +157,13 @@ const actualizarUsuario = async (req, res) => {
     .input('Nombre', sql.NVarChar, Nombre)
     .input('Contraseña', sql.NVarChar, hashedPassword)
     .input('Rol', sql.NVarChar, Rol)
+    .input('Primer_ingreso', sql.Bit, Primer_ingreso)
     .query(`
         UPDATE Usuarios
         SET Nombre = @Nombre,
             Contraseña = COALESCE(@Contraseña, Contraseña),
             Rol = @Rol
+            Primer_ingreso= @Primer_ingreso
         WHERE Email = @Email -- Aquí deberías usar el email
     `);
 
