@@ -4,7 +4,7 @@ const express = require('express');
 const sql = require('mssql');
 const bcrypt = require('bcrypt');
 const authRoutes = require('./routes/auth'); // Importar las rutas de autenticación
-const agregarUsuarioRoutes = require('./routes/agregarUsuario');
+const agregarUsuarioRoutes = require('./routes/usuarioRoutes');
 const changePasswordRoutes = require('./routes/changePasswordRoutes');
 const clientesRoutes = require('./routes/clientes');
 const dbConfig = require('./config/dbConfig'); // Asegúrate de importar tu configuración de DB
@@ -20,7 +20,7 @@ app.use(express.json()); // Middleware para parsear el JSON
 app.use('/auth', authRoutes); // Usar las rutas de autenticación
 app.use('/usuarios', agregarUsuarioRoutes);
 app.use('/api/password', changePasswordRoutes); 
-app.use('/usuarios-completo', agregarUsuarioCompleto);
+app.use('/usuarios-completo', agregarUsuarioRoutes);
 app.use('/api', clientesRoutes); // Rutas de clientes
 app.use('/api/servicios', servicesRoute); // Rutas de servicios
 
