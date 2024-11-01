@@ -57,13 +57,4 @@ app.listen(PORT, () => {
 
  crearUsuarios();
 */
->>>>>>> 9d7ead7b7c2013602a3c54227eb7b327d4ffd2e2
 
-       console.log('Usuario creado exitosamente');
-   } catch (error) {
-       console.error('Error al crear usuario:', error);
-   }
- }
-
- crearUsuarios();
-*/
