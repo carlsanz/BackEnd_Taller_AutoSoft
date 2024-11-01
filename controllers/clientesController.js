@@ -73,7 +73,6 @@ const agregarCliente = async (req, res) => {
         res.status(500).send('Error en la conexión a la base de datos');
     }
 };
-
 //buscar clientes por numero de identidad
 const buscarClientePorIdentidad = async (req, res) => {
     const { identidad } = req.params;
