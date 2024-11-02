@@ -10,18 +10,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "bootstrap": "^5.3.3",
     "cors": "^2.8.5",
-<<<<<<< HEAD
-    "express": "^4.21.0",
-    "mssql": "^11.0.1"
-=======
+
     "express": "^4.21.1",
     "mssql": "^11.0.1",
     "my-login-back": "file:"
->>>>>>> 5430d1958ed1d1f41b4e90b17a4a49fb27dc7999
+
   },
   "description": ""
 }
