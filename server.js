@@ -10,6 +10,7 @@ const clientesRoutes = require('./routes/clientes');
 const dbConfig = require('./config/dbConfig'); // Asegúrate de importar tu configuración de DB
 const cors = require('cors');
 const servicesRoute = require('./routes/servicesRoute');
+const autosRoutes = require('./routes/autoRoute'); 
 
 
 
@@ -23,6 +24,9 @@ app.use('/api/password', changePasswordRoutes);
 app.use('/usuarios-completo', agregarUsuarioRoutes);
 app.use('/api', clientesRoutes); // Rutas de clientes
 app.use('/api/servicios', servicesRoute); // Rutas de servicios
+
+app.use('/autos', autosRoutes)
+
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
