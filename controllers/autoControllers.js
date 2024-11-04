@@ -28,7 +28,8 @@ const verifyClient = async (req, res) => {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request()
             .input('identidad', sql.VarChar, identidad)
-            .query('SELECT Identidad, P_nombre FROM Personas WHERE Identidad = @identidad');
+            .query("SELECT CONCAT(Personas.P_nombre, ' ', Personas.P_apellido) AS Nombre, Clientes.Identidad FROM Clientes INNER JOIN Personas ON Clientes.Identidad = Personas.Identidad WHERE Clientes.Identidad = @identidad");
+
 
         if (result.recordset.length === 0) {
             return res.status(404).json({ message: 'Cliente no encontrado' });
@@ -169,6 +170,20 @@ const getColores = async (req, res) => {
     }
 };
 
+// Obtener todos los autos
+const obtenerAutos = async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        const resultado = await pool.request().query('SELECT * FROM Autos a INNER JOIN Modelos m ON a.Id_modelo = m.Id_modelo INNER JOIN Tipo_autos t ON a.Id_tipo= t.Id_tipo INNER JOIN Colores c ON a.Id_color=c.Id_color');
+
+        res.status(200).json(resultado.recordset);
+    } catch (error) {
+        console.error('Error al obtener los autos :', error);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
+};
+
+
 
 module.exports = {
     getAutoByPlate,
@@ -178,5 +193,6 @@ module.exports = {
     deleteAutoByPlate,
     getModelos,
     getTipos,
-    getColores
+    getColores,
+    obtenerAutos
 };
