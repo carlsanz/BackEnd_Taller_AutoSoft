@@ -11,6 +11,7 @@ const dbConfig = require('./config/dbConfig'); // Asegúrate de importar tu conf
 const cors = require('cors');
 const servicesRoute = require('./routes/servicesRoute');
 const autosRoutes = require('./routes/autoRoute'); 
+const repuestosRoutes = require('./routes/repuestosRoutes');
 
 
 
@@ -25,7 +26,9 @@ app.use('/usuarios-completo', agregarUsuarioRoutes);
 app.use('/api', clientesRoutes); // Rutas de clientes
 app.use('/api/servicios', servicesRoute); // Rutas de servicios
 
-app.use('/autos', autosRoutes)
+app.use('/autos', autosRoutes);
+
+app.use('/repuestos', repuestosRoutes); //ruta para los repuestos
 
 
 // Iniciar el servidor

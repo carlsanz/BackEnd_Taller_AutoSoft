@@ -28,7 +28,7 @@ const verifyClient = async (req, res) => {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request()
             .input('identidad', sql.VarChar, identidad)
-            .query('SELECT * FROM Clientes WHERE Identidad = @identidad');
+            .query('SELECT Identidad, P_nombre FROM Personas WHERE Identidad = @identidad');
 
         if (result.recordset.length === 0) {
             return res.status(404).json({ message: 'Cliente no encontrado' });
