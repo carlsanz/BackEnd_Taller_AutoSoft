@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addAuto, updateAutoByPlate, deleteAutoByPlate, getAutoByPlate, verifyClient, getModelos, getTipos, getColores, obtenerAutos } = require('../controllers/autoControllers');
+const { addAuto, updateAutoByPlate, deleteAutoByPlate, getAutoByPlate, verifyClient, getModelos, getTipos, getColores, obtenerAutos, obtenerAutosConDetalles } = require('../controllers/autoControllers');
 
 // Definición de las rutas para autos
 router.post('/', addAuto);
@@ -12,5 +12,7 @@ router.get('/modelos' , getModelos);
 router.get('/tipos' , getTipos);
 router.get('/colores' , getColores);
 router.get('/obtener', obtenerAutos);
+
+router.get('/todos', obtenerAutosConDetalles);
 
 module.exports = router;
