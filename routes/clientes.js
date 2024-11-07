@@ -3,7 +3,8 @@ const { obtenerDepartamentos,
     agregarCliente,
     buscarClientePorIdentidad,
     actualizarCliente,
-    eliminarCliente} = require('../controllers/clientesController');
+    eliminarCliente,
+    obtenerTodosLosClientes} = require('../controllers/clientesController');
 
 
 const router = express.Router();
@@ -22,6 +23,8 @@ router.put('/clientes/:identidad', actualizarCliente);
 
 //ruta para eliminar cliente 
 router.delete('/clientes/:identidad', eliminarCliente);
+
+router.get('/todos',obtenerTodosLosClientes);
 
 
 module.exports = router;

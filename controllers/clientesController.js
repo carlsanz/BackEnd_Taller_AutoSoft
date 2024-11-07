@@ -2,6 +2,38 @@ const sql = require('mssql');
 const bcrypt = require('bcrypt');
 const dbConfig = require('../config/dbConfig');
 
+
+//Obtener todos los clientes
+const obtenerTodosLosClientes = async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+
+        // Consulta SQL para obtener los campos especificados de los clientes
+        const result = await pool.request()
+            .query(`
+                SELECT 
+                    Personas.Identidad, 
+                    Personas.P_nombre, 
+                    Personas.P_apellido, 
+                    Personas.Genero, 
+                    Personas.Direccion
+                FROM Clientes
+                INNER JOIN Personas ON Clientes.Identidad = Personas.Identidad
+            `);
+
+        if (result.recordset.length > 0) {
+            res.json(result.recordset);  // Devuelve los datos de los clientes
+        } else {
+            res.status(404).json({ message: 'No se encontraron clientes' });
+        }
+    } catch (error) {
+        console.error('Error al obtener los clientes:', error);
+        res.status(500).send('Error al obtener los clientes');
+    }
+};
+
+
+
 //Endpoint para obtener los departamentos
 const obtenerDepartamentos = async (req, res) => {
     try {
@@ -162,4 +194,4 @@ const eliminarCliente = async (req, res) => {
         res.status(500).send('Error al eliminar el cliente');
     }
 };
-module.exports = { obtenerDepartamentos, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente };
+module.exports = { obtenerDepartamentos, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente, obtenerTodosLosClientes };
