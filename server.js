@@ -20,7 +20,7 @@ app.use(cors()); // Middleware de CORS debe estar antes de las rutas
 app.use(express.json()); // Middleware para parsear el JSON
 
 app.use('/auth', authRoutes); // Usar las rutas de autenticación
-app.use('/usuarios', agregarUsuarioRoutes);
+//app.use('/usuarios', agregarUsuarioRoutes);
 app.use('/api/password', changePasswordRoutes); 
 app.use('/usuarios-completo', agregarUsuarioRoutes);
 app.use('/api', clientesRoutes); // Rutas de clientes

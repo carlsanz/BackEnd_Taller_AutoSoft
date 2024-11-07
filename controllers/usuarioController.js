@@ -252,10 +252,43 @@ const eliminarUsuario = async (req, res) => {
     }
 };
 
+async function obtenerEmpleados(req, res) {
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request().query(`
+            SELECT 
+                p.Identidad,
+                p.P_nombre,
+                p.S_nombre,
+                p.P_apellido,
+                p.S_apellido,
+                p.Genero,
+                p.Direccion
+            FROM Empleados e
+            JOIN Personas p ON e.Identidad = p.Identidad
+        `);
+
+        // Formato de respuesta
+        const empleados = result.recordset.map(empleado => ({
+            Identidad: empleado.Identidad,
+            Nombre: `${empleado.P_nombre} ${empleado.S_nombre}`,
+            Apellido: `${empleado.P_apellido} ${empleado.S_apellido}`,
+            Genero: empleado.Genero,
+            Direccion: empleado.Direccion,
+        }));
+
+        res.json(empleados);
+    } catch (error) {
+        console.error('Error al obtener empleados:', error);
+        res.status(500).json({ error: 'Error al obtener la lista de empleados' });
+    }
+}
+
 // Exportar la función
 module.exports = {
     agregarUsuarioCompleto,
     buscarUsuario,
     actualizarUsuario,
-    eliminarUsuario
+    eliminarUsuario,
+    obtenerEmpleados
 };
