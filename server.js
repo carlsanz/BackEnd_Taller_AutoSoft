@@ -12,6 +12,7 @@ const cors = require('cors');
 const servicesRoute = require('./routes/servicesRoute');
 const autosRoutes = require('./routes/autoRoute'); 
 const repuestosRoutes = require('./routes/repuestosRoutes');
+const inventarioRoutes = require('./routes/inventoryRoute');
 
 
 
@@ -29,6 +30,8 @@ app.use('/api/servicios', servicesRoute); // Rutas de servicios
 app.use('/autos', autosRoutes);
 
 app.use('/repuestos', repuestosRoutes); //ruta para los repuestos
+
+app.use('/inventarios', inventarioRoutes );
 
 
 // Iniciar el servidor
