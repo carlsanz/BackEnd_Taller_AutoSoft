@@ -14,6 +14,9 @@ const autosRoutes = require('./routes/autoRoute');
 const repuestosRoutes = require('./routes/repuestosRoutes');
 const inventarioRoutes = require('./routes/inventoryRoute');
 
+const citasRouter = require('./routes/CitaRoutes');
+
+
 
 
 const app = express();
@@ -32,6 +35,8 @@ app.use('/autos', autosRoutes);
 app.use('/repuestos', repuestosRoutes); //ruta para los repuestos
 
 app.use('/inventarios', inventarioRoutes );
+
+app.use('/citas', citasRouter);
 
 
 // Iniciar el servidor
