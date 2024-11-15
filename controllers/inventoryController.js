@@ -52,9 +52,9 @@ const obtenerInventario = async (req, res) => {
 const agregarInventario = async (req, res) => {
     const { Id_repuesto, Fecha_ingreso, Cantidad_disponible} = req.body;
 
-    if (Fecha_inicio < Fecha_ingreso || Fecha_fin < Fecha_inicio) {
-        return res.status(400).json({ message: "Fechas inválidas" });
-    }
+    // if (Fecha_inicio < Fecha_ingreso || Fecha_fin < Fecha_inicio) {
+    //     return res.status(400).json({ message: "Fechas inválidas" });
+    // }
 
     try {
         const pool = await sql.connect(dbConfig);
