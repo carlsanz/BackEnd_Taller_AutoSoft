@@ -170,22 +170,10 @@ const getColores = async (req, res) => {
     }
 };
 
-// Obtener todos los autos
+
+
+//Obtener Autos 
 const obtenerAutos = async (req, res) => {
-    try {
-        const pool = await sql.connect(dbConfig);
-        const resultado = await pool.request().query('SELECT * FROM Autos a INNER JOIN Modelos m ON a.Id_modelo = m.Id_modelo INNER JOIN Tipo_autos t ON a.Id_tipo= t.Id_tipo INNER JOIN Colores c ON a.Id_color=c.Id_color');
-
-        res.status(200).json(resultado.recordset);
-    } catch (error) {
-        console.error('Error al obtener los autos :', error);
-        res.status(500).json({ message: 'Error del servidor' });
-    }
-};
-
-
-//Obtener Autos con detalles de modelo color y tipo
-const obtenerAutosConDetalles = async (req, res) => {
     try {
         const pool = await sql.connect(dbConfig);
         const resultado = await pool.request().query(`
@@ -221,5 +209,5 @@ module.exports = {
     getTipos,
     getColores,
     obtenerAutos,
-    obtenerAutosConDetalles
+    
 };

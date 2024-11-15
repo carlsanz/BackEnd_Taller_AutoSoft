@@ -37,9 +37,7 @@ const obtenerInventario = async (req, res) => {
             .query(`SELECT i.Id_inventario, r.Nombre AS nombre, r.Descripcion AS descripcion, 
                     m.Nombre AS marca, p.Nombre AS proveedor, r.Precio AS precio, 
                     i.Cantidad_disponible, 
-                    CONVERT(varchar, i.Fecha_ingreso, 23) AS Fecha_ingreso, 
-                    CONVERT(varchar, i.Fecha_inicio, 23) AS Fecha_inicio, 
-                    CONVERT(varchar, i.Fecha_fin, 23) AS Fecha_fin
+                    CONVERT(varchar, i.Fecha_ingreso, 23) AS Fecha_ingreso
                     FROM Inventarios i
                     JOIN Repuestos r ON i.Id_repuesto = r.Id_repuesto
                     JOIN Marca_repuestos m ON r.Id_marca_repuesto = m.Id_marca_repuesto
@@ -52,7 +50,7 @@ const obtenerInventario = async (req, res) => {
 };
 
 const agregarInventario = async (req, res) => {
-    const { Id_repuesto, Fecha_ingreso, Cantidad_disponible, Fecha_inicio, Fecha_fin } = req.body;
+    const { Id_repuesto, Fecha_ingreso, Cantidad_disponible} = req.body;
 
     if (Fecha_inicio < Fecha_ingreso || Fecha_fin < Fecha_inicio) {
         return res.status(400).json({ message: "Fechas inválidas" });
@@ -64,9 +62,7 @@ const agregarInventario = async (req, res) => {
             .input("Id_repuesto", sql.Int, Id_repuesto)
             .input("Fecha_ingreso", sql.Date, Fecha_ingreso)
             .input("Cantidad_disponible", sql.Int, Cantidad_disponible)
-            .input("Fecha_inicio", sql.Date, Fecha_inicio)
-            .input("Fecha_fin", sql.Date, Fecha_fin)
-            .query("INSERT INTO Inventarios (Id_repuesto, Fecha_ingreso, Cantidad_disponible, Fecha_inicio, Fecha_fin) OUTPUT inserted.Id_inventario AS id VALUES (@Id_repuesto, @Fecha_ingreso, @Cantidad_disponible, @Fecha_inicio, @Fecha_fin)");
+            .query("INSERT INTO Inventarios (Id_repuesto, Fecha_ingreso, Cantidad_disponible) OUTPUT inserted.Id_inventario AS id VALUES (@Id_repuesto, @Fecha_ingreso, @Cantidad_disponible)");
         res.status(201).json(result.recordset[0]);
     } catch (error) {
         console.error("Error al agregar al inventario:", error);
@@ -76,13 +72,8 @@ const agregarInventario = async (req, res) => {
 
 // Función para actualizar un registro en el inventario
 const actualizarInventario = async (req, res) => {
-    const { id } = req.params; // ID del inventario a actualizar
-    const { Id_repuesto, Fecha_ingreso, Cantidad_disponible, Fecha_inicio, Fecha_fin } = req.body;
-
-    // Verificar que las fechas sean válidas
-    if (Fecha_inicio < Fecha_ingreso || Fecha_fin < Fecha_inicio) {
-        return res.status(400).json({ message: "Fechas inválidas" });
-    }
+    const { id } = req.params; 
+    const { Id_repuesto, Fecha_ingreso, Cantidad_disponible } = req.body;
 
     try {
         const pool = await sql.connect(dbConfig);
@@ -91,14 +82,10 @@ const actualizarInventario = async (req, res) => {
             .input("Id_repuesto", sql.Int, Id_repuesto)
             .input("Fecha_ingreso", sql.Date, Fecha_ingreso)
             .input("Cantidad_disponible", sql.Int, Cantidad_disponible)
-            .input("Fecha_inicio", sql.Date, Fecha_inicio)
-            .input("Fecha_fin", sql.Date, Fecha_fin)
             .query(`UPDATE Inventarios 
                     SET Id_repuesto = @Id_repuesto, 
                         Fecha_ingreso = @Fecha_ingreso, 
-                        Cantidad_disponible = @Cantidad_disponible, 
-                        Fecha_inicio = @Fecha_inicio, 
-                        Fecha_fin = @Fecha_fin 
+                        Cantidad_disponible = @Cantidad_disponible
                     WHERE Id_inventario = @Id_inventario`);
                     
         res.status(200).json({ message: "Inventario actualizado correctamente" });
