@@ -28,13 +28,35 @@ const login = async (req, res) => {
         // Convertir 'Primer_ingreso' a booleano si viene como 0 o 1
         const primerIngreso = user.Primer_ingreso === 1;
 
+        console.log("user.Id_usuario:", user.Id_usuario);
+
+        const empleadosResult = await pool.request()
+            .input('id_usuario', sql.Int, user.Id_usuario)
+            .query('SELECT Id_empleados FROM Empleados WHERE Id_usuario = @id_usuario');
+
+        if (empleadosResult.recordset.length === 0) {
+            return res.status(404).json({ message: 'Empleado no encontrado' });
+        }
+
+        const empleado = empleadosResult.recordset[0];
+        const idEmpleados = empleado.Id_empleados;
+
         // Respuesta al frontend con los datos necesarios
         return res.status(200).json({
             message: 'Login exitoso',
             nombre: user.Nombre,
             role: user.Rol,
-            primerIngreso
+            primerIngreso,
+            idEmpleados  // Devolver el Id_empleados
         });
+
+        // Respuesta al frontend con los datos necesarios
+        // return res.status(200).json({
+        //     message: 'Login exitoso',
+        //     nombre: user.Nombre,
+        //     role: user.Rol,
+        //     primerIngreso
+        // });
 
     } catch (error) {
         console.error('Error en el servidor:', error);
