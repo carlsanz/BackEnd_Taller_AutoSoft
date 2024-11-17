@@ -16,6 +16,8 @@ const inventarioRoutes = require('./routes/inventoryRoute');
 
 const citasRouter = require('./routes/CitaRoutes');
 
+const repuestosUtilizadosRoutes = require('./routes/agregarRepuestoCitasRoutes');
+
 
 
 
@@ -37,6 +39,10 @@ app.use('/repuestos', repuestosRoutes); //ruta para los repuestos
 app.use('/inventarios', inventarioRoutes );
 
 app.use('/citas', citasRouter);
+
+app.use('/repuestos', repuestosUtilizadosRoutes);
+
+
 
 
 // Iniciar el servidor

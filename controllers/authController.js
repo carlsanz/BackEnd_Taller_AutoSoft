@@ -28,7 +28,7 @@ const login = async (req, res) => {
         // Convertir 'Primer_ingreso' a booleano si viene como 0 o 1
         const primerIngreso = user.Primer_ingreso === 1;
 
-        console.log("user.Id_usuario:", user.Id_usuario);
+       
 
         const empleadosResult = await pool.request()
             .input('id_usuario', sql.Int, user.Id_usuario)
