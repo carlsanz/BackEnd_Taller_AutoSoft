@@ -34,6 +34,5 @@ router.get('/estados', obtenerEstados);
 
 router.get('/clientesyPlaca', obtenerClientesYplaca);
 
-router.get('/autos', obtenerAutos);
 
 module.exports = router;

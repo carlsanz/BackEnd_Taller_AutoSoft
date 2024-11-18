@@ -40,7 +40,7 @@ app.use('/inventarios', inventarioRoutes );
 
 app.use('/citas', citasRouter);
 
-app.use('/repuestos', repuestosUtilizadosRoutes);
+app.use('/reputilizado', repuestosUtilizadosRoutes);
 
 
 
