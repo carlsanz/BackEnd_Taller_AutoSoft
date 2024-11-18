@@ -38,6 +38,51 @@ const obtenerEstados = async (req, res) => {
     }
 };
 
+
+
+
+const obtenerClientesYplaca = async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        const cientesResult = await pool.request()
+            .query("SELECT Identidad FROM Clientes");
+
+            const personaResult = await pool.request()
+            .query("SELECT Personas.P_nombre, Personas.P_apellido, FROM Personas ");
+        
+            const autoResult = await pool.request()
+           .query("SELECT Placa, Id_modelo, Id_tipo, Id_color FROM Autos");
+        
+         res.json({
+            Nombre: personaResult.recordset,
+            cliente:cientesResult.recordset,
+            placa: autoResult.recordset
+
+         })
+    } catch (error) {
+        console.error('Error al obtener los clientes y autos:', error);
+        res.status(500).send('Error al obtener los clientes');
+    }
+};
+
+const obtenerCitas = async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request().
+        query(`select c.Id_cita, c.Id_cliente, c.Id_empleados, c.Fecha_ingreso, 
+        c.Descripcion, c.Id_estado, ec.Nombre as estado,
+         a.Placa AS placa, p.P_nombre AS Nombre from Citas c
+        JOIN Autos a ON c.Id_auto=a.Id_auto
+        JOIN Clientes cl ON c.Id_cliente=cl.Id_cliente
+        JOIN Personas p ON cl.Identidad = p.Identidad
+        JOIN Estados_Citas ec ON c.Id_estado=ec.Id_estado`);
+        res.json(result.recordset);
+    } catch (error) {
+        console.error("Error al obtener la cita:", error);
+        res.status(500).json({ message: "Error al obtener el Citas" });
+    }
+};
+
 // Crear una nueva cita
 const crearCita = async (req, res) => {
     const { Id_cliente, Id_empleados, Id_auto, Fecha_ingreso, Descripcion, Id_estado } = req.body;
@@ -61,15 +106,6 @@ const crearCita = async (req, res) => {
 };
 
 // Obtener todas las citas
-const obtenerCitas = async (req, res) => {
-    try {
-        const pool = await sql.connect(dbConfig);
-        const result = await pool.request().query('SELECT * FROM Citas');
-        res.json(result.recordset);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
 
 // Obtener una cita por ID
 const obtenerCitaPorId = async (req, res) => {
@@ -129,6 +165,7 @@ module.exports = {
     obtenerEstados,
     crearCita,
     obtenerCitas,
+    obtenerClientesYplaca,
     obtenerCitaPorId,
     actualizarCita,
     eliminarCita

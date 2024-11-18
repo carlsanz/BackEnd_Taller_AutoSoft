@@ -7,7 +7,9 @@ const {
     crearCita,
     obtenerCitaPorId,
     actualizarCita,
-    eliminarCita
+    eliminarCita,
+    obtenerClientesYplaca
+    
 } = require('../controllers/citasControllers');
 
 router.post('/', crearCita);
@@ -29,5 +31,9 @@ router.get('/placa/:placa', buscarAutoPorPlaca);
 
 // Obtener lista de estados
 router.get('/estados', obtenerEstados);
+
+router.get('/clientesyPlaca', obtenerClientesYplaca);
+
+router.get('/autos', obtenerAutos);
 
 module.exports = router;
