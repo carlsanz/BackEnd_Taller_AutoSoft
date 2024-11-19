@@ -2,6 +2,18 @@ const sql = require('mssql');
 const dbConfig = require('../config/dbConfig');
 
 
+const obtenerServiciosXcita = async (req, res) => {
+    try {
+      const pool = await sql.connect(dbConfig);
+      const result = await pool.request().query('SELECT * FROM Servicios'); // Cambia la consulta si necesitas filtrar datos
+      res.status(200).json(result.recordset);
+    } catch (error) {
+      console.error('Error al obtener servicios:', error);
+      res.status(500).send('Error al obtener los servicios');
+    }
+  };
+
+
 const obtenerServicios = async (req, res) => {
     try {
         const pool = await sql.connect(dbConfig);
@@ -92,5 +104,46 @@ const actualizarServicio = async (req, res) => {
     }
 };
 
-module.exports = { obtenerServicios, agregarServicio, borrarServicio, actualizarServicio  };
+const asociarServicioConCita = async (req, res) => {
+    const { id_cita, id_servicio } = req.body;
+  
+    if (!id_cita || !id_servicio) {
+      return res.status(400).json({ message: 'Faltan los parámetros id_cita o id_servicio' });
+    }
+  
+    try {
+      // Conectarse a la base de datos
+      const pool = await sql.connect(dbConfig);
+  
+      // Verificar si el servicio ya está asociado con la cita
+      const existingService = await pool.request()
+        .input('id_cita', sql.Int, id_cita)
+        .input('id_servicio', sql.Int, id_servicio)
+        .query('SELECT COUNT(*) AS count FROM Citas_Servicios WHERE id_cita = @id_cita AND id_servicio = @id_servicio');
+  
+      if (existingService.recordset[0].count > 0) {
+        // Si ya existe, devolver un mensaje indicando que no se puede insertar de nuevo
+        return res.status(400).json({ message: 'Este servicio ya está asociado con la cita.' });
+      }
+  
+      // Realizar la inserción en la tabla Citas_Servicios
+      const query = `
+        INSERT INTO Citas_Servicios (id_cita, id_servicio)
+        VALUES (@id_cita, @id_servicio);
+      `;
+  
+      await pool.request()
+        .input('id_cita', sql.Int, id_cita)
+        .input('id_servicio', sql.Int, id_servicio)
+        .query(query);
+  
+      res.status(201).json({ message: 'Servicio asociado a la cita correctamente' });
+  
+    } catch (error) {
+      console.error('Error al asociar el servicio con la cita:', error);
+      res.status(500).json({ message: 'Error del servidor' });
+    }
+  };
+
+module.exports = { obtenerServicios, agregarServicio, borrarServicio, actualizarServicio, obtenerServiciosXcita, asociarServicioConCita };
 
