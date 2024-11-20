@@ -58,26 +58,7 @@ const agregarServicio = async (req, res) => {
     }
 };
 
-// Controlador para borrar un servicio
-const borrarServicio = async (req, res) => {
-    const { id } = req.params;
 
-    try {
-        const pool = await sql.connect(dbConfig);
-        const result = await pool.request()
-            .input('Id_servicio', sql.Int, id)
-            .query('DELETE FROM Servicios WHERE Id_servicio = @Id_servicio');
-
-        if (result.rowsAffected[0] === 0) {
-            return res.status(404).json({ message: 'Servicio no encontrado' });
-        }
-
-        res.status(200).json({ message: 'Servicio borrado exitosamente' });
-    } catch (error) {
-        console.error('Error al borrar el servicio:', error);
-        res.status(500).json({ message: 'Error del servidor' });
-    }
-};
 
 const actualizarServicio = async (req, res) => {
     const { id } = req.params;
@@ -145,5 +126,74 @@ const asociarServicioConCita = async (req, res) => {
     }
   };
 
-module.exports = { obtenerServicios, agregarServicio, borrarServicio, actualizarServicio, obtenerServiciosXcita, asociarServicioConCita };
+
+  const obtenerServiciosPorCita = async (req, res) => {
+    const { id_cita } = req.params;
+
+    try {
+        const pool = await sql.connect(dbConfig);
+
+        const result = await pool.request()
+            .input('id_cita', sql.Int, id_cita)
+            .query(`
+                SELECT 
+                    CS.id_servicio,
+                    S.Nombre AS nombre_servicio,
+                    S.Precio AS precio_servicio
+                FROM Citas_Servicios CS
+                INNER JOIN Servicios S ON CS.id_servicio = S.id_servicio
+                WHERE CS.id_cita = @id_cita
+            `);
+
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron servicios para esta cita.' });
+        }
+
+        res.status(200).json(result.recordset);
+    } catch (error) {
+        console.error('Error al obtener los servicios:', error);
+        res.status(500).json({ message: 'Error del servidor al obtener los servicios.' });
+    }
+};
+
+
+const eliminarServicioDeCita = async (req, res) => {
+  const { id_cita, id_servicio } = req.params;
+
+  try {
+      // Verificar que los parámetros son válidos
+      if (isNaN(id_cita) || isNaN(id_servicio)) {
+          return res.status(400).json({ message: 'ID de cita o servicio inválido.' });
+      }
+
+      const pool = await sql.connect(dbConfig);
+
+      // Ejecutar la consulta para eliminar el servicio
+      const result = await pool.request()
+          .input('id_cita', sql.Int, id_cita)
+          .input('id_servicio', sql.Int, id_servicio)
+          .query(`
+              DELETE FROM Citas_Servicios
+              WHERE id_cita = @id_cita AND id_servicio = @id_servicio
+          `);
+
+      // Comprobar si se eliminó algún registro
+      if (result.rowsAffected[0] === 0) {
+          console.log('No se encontró el servicio asociado a esta cita.');
+          return res.status(404).json({ message: 'Servicio no encontrado para esta cita.' });
+      }
+
+      
+      res.status(200).json({ message: 'Servicio eliminado correctamente de la cita.' });
+
+  } catch (error) {
+      console.error('Error al eliminar el servicio:', error.message);
+      res.status(500).json({
+          message: 'Error del servidor al eliminar el servicio.',
+          error: error.message
+      });
+  }
+};
+
+module.exports = { obtenerServicios, agregarServicio,  actualizarServicio, obtenerServiciosXcita, asociarServicioConCita, obtenerServiciosPorCita, eliminarServicioDeCita };
 
