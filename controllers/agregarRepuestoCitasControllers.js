@@ -66,51 +66,51 @@ const agregarRepuestoUtilizado = async (req, res) => {
 
 
 // Eliminar repuesto utilizado
-const eliminarRepuestoUtilizado = async (req, res) => {
-    const { id } = req.params; // Id_repuesto_utilizado
+// const eliminarRepuestoUtilizado = async (req, res) => {
+//     const { id } = req.params; // Id_repuesto_utilizado
 
-    try {
-        const pool = await sql.connect(dbConfig);
+//     try {
+//         const pool = await sql.connect(dbConfig);
 
-        // Obtener detalles del repuesto y la cita asociada
-        const repuesto = await pool.request()
-            .input('Id_repuesto_utilizado', sql.Int, id)
-            .query(`
-                SELECT RU.Id_inventario, RU.Cantidad_usada, C.Id_estado
-                FROM Repuesto_Utilizado RU
-                INNER JOIN Citas C ON RU.Id_cita = C.Id_cita
-                WHERE RU.Id_repuesto_utilizado = @Id_repuesto_utilizado
-            `);
+//         // Obtener detalles del repuesto y la cita asociada
+//         const repuesto = await pool.request()
+//             .input('Id_repuesto_utilizado', sql.Int, id)
+//             .query(`
+//                 SELECT RU.Id_inventario, RU.Cantidad_usada, C.Id_estado
+//                 FROM Repuesto_Utilizado RU
+//                 INNER JOIN Citas C ON RU.Id_cita = C.Id_cita
+//                 WHERE RU.Id_repuesto_utilizado = @Id_repuesto_utilizado
+//             `);
 
-        if (repuesto.recordset.length === 0) {
-            return res.status(404).json({ message: 'Repuesto utilizado no encontrado' });
-        }
+//         if (repuesto.recordset.length === 0) {
+//             return res.status(404).json({ message: 'Repuesto utilizado no encontrado' });
+//         }
 
-        const { Id_inventario, Cantidad_usada, Id_estado } = repuesto.recordset[0];
+//         const { Id_inventario, Cantidad_usada, Id_estado } = repuesto.recordset[0];
 
-        // Si el estado es "Pendiente" o "En Proceso", devolver cantidad al inventario
-        if (Id_estado === 1 || Id_estado === 2) { // Asumiendo 1=Pendiente, 2=En Proceso
-            await pool.request()
-                .input('Id_inventario', sql.Int, Id_inventario)
-                .input('Cantidad_usada', sql.Int, Cantidad_usada)
-                .query(`
-                    UPDATE Inventario
-                    SET Cantidad_disponible = Cantidad_disponible + @Cantidad_usada
-                    WHERE Id_inventario = @Id_inventario
-                `);
-        }
+//         // Si el estado es "Pendiente" o "En Proceso", devolver cantidad al inventario
+//         if (Id_estado === 1 || Id_estado === 2) { // Asumiendo 1=Pendiente, 2=En Proceso
+//             await pool.request()
+//                 .input('Id_inventario', sql.Int, Id_inventario)
+//                 .input('Cantidad_usada', sql.Int, Cantidad_usada)
+//                 .query(`
+//                     UPDATE Inventario
+//                     SET Cantidad_disponible = Cantidad_disponible + @Cantidad_usada
+//                     WHERE Id_inventario = @Id_inventario
+//                 `);
+//         }
 
-        // Eliminar repuesto utilizado
-        await pool.request()
-            .input('Id_repuesto_utilizado', sql.Int, id)
-            .query('DELETE FROM Repuesto_Utilizado WHERE Id_repuesto_utilizado = @Id_repuesto_utilizado');
+//         // Eliminar repuesto utilizado
+//         await pool.request()
+//             .input('Id_repuesto_utilizado', sql.Int, id)
+//             .query('DELETE FROM Repuesto_Utilizado WHERE Id_repuesto_utilizado = @Id_repuesto_utilizado');
 
-        res.status(200).json({ message: 'Repuesto utilizado eliminado correctamente' });
-    } catch (error) {
-        console.error('Error al eliminar el repuesto utilizado:', error);
-        res.status(500).json({ message: 'Error al eliminar el repuesto utilizado' });
-    }
-};
+//         res.status(200).json({ message: 'Repuesto utilizado eliminado correctamente' });
+//     } catch (error) {
+//         console.error('Error al eliminar el repuesto utilizado:', error);
+//         res.status(500).json({ message: 'Error al eliminar el repuesto utilizado' });
+//     }
+// };
 
 const getRepuestosDisponibles = async (req, res) => {
     try {
@@ -137,8 +137,88 @@ const getRepuestosDisponibles = async (req, res) => {
     }
 };
 
+const obtenerRepuestosPorCita = async (req, res) => {
+    const { id_cita } = req.params;
+
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input('id_cita', sql.Int, id_cita)
+            .query(`
+                SELECT 
+                    RU.id_inventario,
+                    RU.Cantidad_usada,
+                    R.nombre AS nombre_repuesto
+                FROM Repuesto_Utilizado RU
+                INNER JOIN Inventarios I ON RU.id_inventario = I.id_inventario
+                INNER JOIN Repuestos R ON I.id_repuesto = R.id_repuesto
+                WHERE RU.id_cita = @id_cita
+            `);
+
+        res.status(200).json(result.recordset);
+    } catch (error) {
+        console.error('Error al obtener los repuestos:', error);
+        res.status(500).json({ message: 'Error del servidor al obtener los repuestos.' });
+    }
+};
+
+const eliminarRepuestoPorInventario = async (req, res) => {
+    const { id_cita, id_inventario } = req.params;
+   
+
+    try {
+        const pool = await sql.connect(dbConfig);
+       
+
+        // Obtener información del repuesto
+        const repuestoInfo = await pool.request()
+            .input('id_cita', sql.Int, id_cita)
+            .input('id_inventario', sql.Int, id_inventario)
+            .query(`
+                SELECT Cantidad_usada
+                FROM Repuesto_Utilizado
+                WHERE id_cita = @id_cita AND id_inventario = @id_inventario
+            `);
+        
+        if (repuestoInfo.recordset.length === 0) {
+            console.log('No se encontró el repuesto.');
+            return res.status(404).json({ message: 'Repuesto no encontrado para esta cita.' });
+        }
+
+        const { Cantidad_usada } = repuestoInfo.recordset[0];
+
+        // Actualizar el inventario
+        const updateInventario = await pool.request()
+            .input('id_inventario', sql.Int, id_inventario)
+            .input('Cantidad_usada', sql.Int, Cantidad_usada)
+            .query(`
+                UPDATE Inventarios
+                SET Cantidad_disponible = Cantidad_disponible + @Cantidad_usada
+                WHERE id_inventario = @id_inventario
+            `);
+        
+
+        // Eliminar el repuesto utilizado
+        const deleteRepuesto = await pool.request()
+            .input('id_cita', sql.Int, id_cita)
+            .input('id_inventario', sql.Int, id_inventario)
+            .query(`
+                DELETE FROM Repuesto_Utilizado
+                WHERE id_cita = @id_cita AND id_inventario = @id_inventario
+            `);
+       
+
+        res.status(200).json({ message: 'Repuesto eliminado y cantidad devuelta al inventario.' });
+    } catch (error) {
+        console.error('Error al eliminar el repuesto:', error);
+        res.status(500).json({ message: 'Error del servidor al eliminar el repuesto.' });
+    }
+};
+
 module.exports = {
     agregarRepuestoUtilizado,
-    eliminarRepuestoUtilizado,
-    getRepuestosDisponibles
+    // eliminarRepuestoUtilizado,
+    getRepuestosDisponibles,
+    obtenerRepuestosPorCita,
+    eliminarRepuestoPorInventario
 };
