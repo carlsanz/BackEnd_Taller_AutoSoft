@@ -1,23 +1,36 @@
 const sql = require('mssql');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt'); // Asegúrate de instalar bcrypt
 const dbConfig = require('../config/dbConfig'); // Importar tu configuración de DB
 
+// Configuración para el transporte de correo electrónico (ajusta esto según tu proveedor de correo)
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'autosoft.tallermecanico@gmail.com',
+        pass: 'eobb nbfa cjef xvfs'
+    }
+});
 
 
+function generarContraseñaProvisional() {
+    return crypto.randomBytes(8).toString('hex'); // Genera una cadena de 16 caracteres hexadecimales
+}
 
 const agregarUsuarioCompleto = async (req, res) => {
     const {
         Identidad, P_nombre, S_nombre, P_apellido, S_apellido,
         Direccion, Telefono, Fecha_nac, Correo, Genero,
-        Nombre, Email, Contraseña, Rol, Ocupacion, Salario, Fecha_contratacion, Id_departamento, Primer_ingreso
-        } = req.body;
+        Nombre, Email, Rol, Ocupacion, Salario, Fecha_contratacion, Id_departamento, Primer_ingreso
+    } = req.body;
 
     console.log(req.body); // Para depuración
 
     const pool = await sql.connect(dbConfig);
 
     // Validar campos obligatorios
-    if (!Identidad || !P_nombre || !P_apellido || !Email || !Contraseña || !Rol || !Ocupacion || !Salario || !Fecha_contratacion) {
+    if (!Identidad || !P_nombre || !P_apellido || !Email || !Rol || !Ocupacion || !Salario || !Fecha_contratacion) {
         return res.status(400).send({ error: 'Todos los campos son requeridos.' });
     }
 
@@ -27,8 +40,8 @@ const agregarUsuarioCompleto = async (req, res) => {
         return res.status(400).send({ error: 'El formato del email es inválido.' });
     }
 
-    // Iniciar la transacción
     let transaction;
+
     try {
         transaction = new sql.Transaction(pool);
         await transaction.begin();
@@ -53,14 +66,15 @@ const agregarUsuarioCompleto = async (req, res) => {
             return res.status(400).send({ error: 'La identidad ya está registrada.' });
         }
 
-        // Hashear la contraseña antes de la inserción
-        const hashedPassword = await bcrypt.hash(Contraseña, 10);
+        // Generar y hashear la contraseña provisional
+        const contraseñaProvisional = generarContraseñaProvisional();
+        const hashedPassword = await bcrypt.hash(contraseñaProvisional, 10);
 
         // Inserción en la tabla Usuarios
         const resultUsuario = await pool.request()
             .input('Nombre', sql.NVarChar, Nombre)
             .input('Email', sql.NVarChar, Email)
-            .input('Contraseña', sql.NVarChar, hashedPassword) // Usar la contraseña hasheada
+            .input('Contraseña', sql.NVarChar, hashedPassword)
             .input('Rol', sql.NVarChar, Rol)
             .input('Primer_ingreso', sql.Bit, Primer_ingreso)
             .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol, Primer_ingreso) OUTPUT INSERTED.Id_usuario VALUES (@Nombre, @Email, @Contraseña, @Rol, @Primer_ingreso)');
@@ -70,15 +84,15 @@ const agregarUsuarioCompleto = async (req, res) => {
         // Inserción en la tabla Personas
         await pool.request()
             .input('Identidad', sql.NVarChar, Identidad)
-            .input('Id_departamento', sql.Int, parseInt(Id_departamento, 10)) // Asegúrate de que sea un int
+            .input('Id_departamento', sql.Int, parseInt(Id_departamento, 10))
             .input('P_nombre', sql.NVarChar, P_nombre)
-            .input('S_nombre', sql.NVarChar, S_nombre || '') // Proporcionar un valor por defecto
+            .input('S_nombre', sql.NVarChar, S_nombre || '')
             .input('P_apellido', sql.NVarChar, P_apellido)
-            .input('S_apellido', sql.NVarChar, S_apellido || '') // Proporcionar un valor por defecto
+            .input('S_apellido', sql.NVarChar, S_apellido || '')
             .input('Direccion', sql.NVarChar, Direccion)
-            .input('Telefono', sql.NVarChar, Telefono || '') // Proporcionar un valor por defecto
+            .input('Telefono', sql.NVarChar, Telefono || '')
             .input('Fecha_nac', sql.Date, Fecha_nac)
-            .input('correo', sql.NVarChar, Email) // Asegúrate de que no sea nulo si tienes un valor
+            .input('correo', sql.NVarChar, Correo)
             .input('Genero', sql.NVarChar, Genero)
             .query('INSERT INTO Personas (Identidad, Id_departamento, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero) VALUES (@Identidad, @Id_departamento, @P_nombre, @S_nombre, @P_apellido, @S_apellido, @Direccion, @Telefono, @Fecha_nac, @correo, @Genero)');
 
@@ -93,12 +107,28 @@ const agregarUsuarioCompleto = async (req, res) => {
 
         // Confirmar transacción
         await transaction.commit();
-        res.status(200).send('Usuario agregado correctamente');
+
+        // Enviar un correo electrónico al usuario con la contraseña provisional
+        const mailOptions = {
+            from: 'autosoft.tallermecanico@gmail.com',
+            to: Email,
+            subject: 'Contraseña Provisional',
+            text: `Hola ${Nombre}, tu contraseña provisional es ${contraseñaProvisional}. Por favor cambia esta contraseña al ingresar a tu cuenta.`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error al enviar correo:', error);
+            } else {
+                console.log('Correo enviado:', info.response);
+            }
+        });
+
+        res.status(200).send('Usuario agregado correctamente y correo de contraseña enviado.');
     } catch (error) {
         console.error('Error al agregar usuario:', error);
-        // Si hay algún error, hacer rollback de la transacción
         if (transaction) await transaction.rollback();
-        res.status(400).send({ error: error.message });
+        res.status(500).send({ error: 'Error al agregar usuario.' });
     } finally {
         pool.close();
     }
