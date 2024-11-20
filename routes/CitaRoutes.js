@@ -8,7 +8,9 @@ const {
     obtenerCitaPorId,
     actualizarCita,
     eliminarCita,
-    obtenerClientesYplaca
+    obtenerClientesYplaca,
+    actualizarEstadoCita,
+    actualizarFechaCita
     
 } = require('../controllers/citasControllers');
 
@@ -33,6 +35,12 @@ router.get('/placa/:placa', buscarAutoPorPlaca);
 router.get('/estados', obtenerEstados);
 
 router.get('/clientesyPlaca', obtenerClientesYplaca);
+
+// Actualizar los estados de las citas
+router.put('/actEstado/:id', actualizarEstadoCita);
+
+//Actualizar fecha de las citas
+router.put('/actFecha/:id', actualizarFechaCita);
 
 
 module.exports = router;

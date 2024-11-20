@@ -146,6 +146,39 @@ const actualizarCita = async (req, res) => {
     }
 };
 
+// Actualizar una cita
+const actualizarFechaCita = async (req, res) => {
+    const { id } = req.params;
+    const { Fecha_ingreso } = req.body;
+    try {
+        const pool = await sql.connect(dbConfig);
+        await pool.request()
+            .input('Fecha_ingreso', sql.DateTime, Fecha_ingreso)
+            .input('Id_cita', sql.Int, id)
+            .query('UPDATE Citas SET Fecha_ingreso = @Fecha_ingreso WHERE Id_cita = @Id_cita');
+        res.json({ mensaje: 'Cita actualizada exitosamente' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+//Actualizar un estado de una cita
+
+const actualizarEstadoCita = async (req, res) => {
+    const { id } = req.params;
+    const {  Id_estado } = req.body;
+    try {
+        const pool = await sql.connect(dbConfig);
+        await pool.request()
+            .input('Id_estado', sql.Int, Id_estado)
+            .input('Id_cita', sql.Int, id)
+            .query('UPDATE Citas SET  Id_estado = @Id_estado WHERE Id_cita = @Id_cita');
+        res.json({ mensaje: 'Cita actualizada exitosamente' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Eliminar una cita
 const eliminarCita = async (req, res) => {
     const { id } = req.params;
@@ -168,5 +201,7 @@ module.exports = {
     obtenerClientesYplaca,
     obtenerCitaPorId,
     actualizarCita,
-    eliminarCita
+    eliminarCita,
+    actualizarEstadoCita,
+    actualizarFechaCita
 };

@@ -2,8 +2,8 @@ const sql = require('mssql');
 
 const dbConfig = {
     user: 'sa',
-    password: 'carlos0996',
-    server: 'localhost', // Usa solo el nombre de la máquina
+    password: 'sqlserver',
+    server: 'DESKTOP-MHMU8S3//SQLEXPRESS', // Usa solo el nombre de la máquina
     database: 'TallerMecanico',
     options: {
     
@@ -19,4 +19,3 @@ const dbConfig = {
   });
 
   module.exports = dbConfig;
-  
