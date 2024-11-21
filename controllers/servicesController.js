@@ -159,6 +159,7 @@ const asociarServicioConCita = async (req, res) => {
 
 const eliminarServicioDeCita = async (req, res) => {
   const { id_cita, id_servicio } = req.params;
+  
 
   try {
       // Verificar que los parámetros son válidos

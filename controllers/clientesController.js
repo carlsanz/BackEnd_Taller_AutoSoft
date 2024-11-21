@@ -174,6 +174,24 @@ const actualizarCliente = async (req, res) => {
         res.status(500).send('Error al actualizar el cliente');
     }
 };
+
+//Obteber empleado por id de empleado
+const ObtenerEmpleadosId= async(req, res)=>
+{
+    const { idEmpleado } = req.params;
+
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request().query('select * from Empleados');
+    
+        res.json(result.recordset);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener citas.');
+    }
+}
+
+
 //funcion para eliminar cliente 
 const eliminarCliente = async (req, res) => {
     const { identidad } = req.params;
@@ -194,4 +212,4 @@ const eliminarCliente = async (req, res) => {
         res.status(500).send('Error al eliminar el cliente');
     }
 };
-module.exports = { obtenerDepartamentos, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente, obtenerTodosLosClientes };
+module.exports = { ObtenerEmpleadosId, obtenerDepartamentos, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente, obtenerTodosLosClientes };

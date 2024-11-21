@@ -4,6 +4,7 @@ const { obtenerDepartamentos,
     buscarClientePorIdentidad,
     actualizarCliente,
     eliminarCliente,
+    ObtenerEmpleadosId,
     obtenerTodosLosClientes} = require('../controllers/clientesController');
 
 
@@ -25,6 +26,8 @@ router.put('/clientes/:identidad', actualizarCliente);
 router.delete('/clientes/:identidad', eliminarCliente);
 
 router.get('/todos',obtenerTodosLosClientes);
+
+router.get('/clientes/:id', ObtenerEmpleadosId);
 
 
 module.exports = router;
