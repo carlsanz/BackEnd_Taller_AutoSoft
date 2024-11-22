@@ -5,21 +5,33 @@ const dbConfig = require('../config/dbConfig');
 
 // Agregar repuesto utilizado
 const agregarRepuestoUtilizado = async (req, res) => {
-    // Extraemos las claves del JSON y las convertimos a enteros si es necesario
     let { id_cita, id_inventario, cantidad } = req.body;
-    
+
     // Convertir a enteros
     id_cita = parseInt(id_cita);
     id_inventario = parseInt(id_inventario);
     cantidad = parseInt(cantidad);
 
-    // Verificamos si alguna de las conversiones falló
     if (isNaN(id_cita) || isNaN(id_inventario) || isNaN(cantidad)) {
         return res.status(400).json({ message: 'Los datos proporcionados son inválidos' });
     }
 
     try {
         const pool = await sql.connect(dbConfig);
+
+        // Verificar si el repuesto ya fue agregado para la misma cita
+        const repuestoExistente = await pool.request()
+            .input('id_cita', sql.Int, id_cita)
+            .input('id_inventario', sql.Int, id_inventario)
+            .query(`
+                SELECT 1 
+                FROM Repuesto_Utilizado 
+                WHERE Id_cita = @id_cita AND Id_inventario = @id_inventario
+            `);
+
+            if (repuestoExistente.recordset.length > 0) {
+                return res.status(200).json({ message: 'El repuesto ya fue agregado para esta cita', repetido: true });
+            }
 
         // Verificar cantidad disponible en el inventario
         const inventario = await pool.request()
@@ -31,11 +43,11 @@ const agregarRepuestoUtilizado = async (req, res) => {
         }
 
         const cantidadDisponible = inventario.recordset[0].Cantidad_disponible;
-        if (cantidad > cantidadDisponible) { // Usamos 'cantidad' directamente del JSON
+        if (cantidad > cantidadDisponible) {
             return res.status(400).json({ message: 'Cantidad insuficiente en el inventario' });
         }
 
-        // Insertar repuesto utilizado en la tabla 'Repuesto_Utilizado'
+        // Insertar repuesto utilizado
         await pool.request()
             .input('id_cita', sql.Int, id_cita)
             .input('id_inventario', sql.Int, id_inventario)
@@ -45,7 +57,7 @@ const agregarRepuestoUtilizado = async (req, res) => {
                 VALUES (@id_cita, @id_inventario, @cantidad_usada)
             `);
 
-        // Actualizar cantidad disponible en la tabla 'Inventarios'
+        // Actualizar cantidad disponible en el inventario
         await pool.request()
             .input('id_inventario', sql.Int, id_inventario)
             .input('cantidad_usada', sql.Int, cantidad)
