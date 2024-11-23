@@ -2,7 +2,7 @@ const sql = require('mssql');
 
 const dbConfig = {
     user: 'sa',
-    password: 'carlos0996',
+    password: 'sqlserver',
     server: 'localhost', // Usa solo el nombre de la máquina
     database: 'TallerMecanico',
     options: {

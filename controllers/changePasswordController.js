@@ -52,7 +52,7 @@ exports.mecanicoChangePassword = async (req, res) => {
             await pool.request()
                 .input('email', sql.VarChar, email)
                 .input('newPassword', sql.VarChar, hashedPassword)
-                .query('UPDATE Usuarios SET Contraseña = @newPassword WHERE Email = @email');
+                .query('UPDATE Usuarios SET Contraseña = @newPassword, Primer_ingreso = 0 WHERE Email = @email');
 
             res.status(200).json({ message: 'Contraseña actualizada con éxito' });
         } else {
