@@ -61,7 +61,7 @@ const agregarUsuarioCompleto = async (req, res) => {
             .input('Email', sql.NVarChar, Email)
             .input('Contraseña', sql.NVarChar, hashedPassword)
             .input('Rol', sql.NVarChar, Rol)
-            .input('Primer_ingreso', sql.Bit, Primer_ingreso === '' ? false : Primer_ingreso)
+            .input('Primer_ingreso', sql.Bit, 1) // Siempre true
             .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol, Primer_ingreso) OUTPUT INSERTED.Id_usuario VALUES (@Nombre, @Email, @Contraseña, @Rol, @Primer_ingreso)');
 
         const idUsuario = resultUsuario.recordset[0].Id_usuario;

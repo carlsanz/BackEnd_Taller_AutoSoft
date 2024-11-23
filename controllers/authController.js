@@ -25,9 +25,8 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
 
-        // Convertir 'Primer_ingreso' a booleano si viene como 0 o 1
-        const primerIngreso = user.Primer_ingreso === 1;
-
+        // Convertir 'Primer_ingreso' a booleano si viene bit
+        const primerIngreso = user.Primer_ingreso;
        
 
         const empleadosResult = await pool.request()
