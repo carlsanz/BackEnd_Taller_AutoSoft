@@ -25,45 +25,30 @@ const agregarUsuarioCompleto = async (req, res) => {
         Nombre, Email, Rol, Ocupacion, Salario, Fecha_contratacion, Id_departamento, Primer_ingreso
     } = req.body;
 
-    console.log(req.body); // Para depuración
+    
 
     const pool = await sql.connect(dbConfig);
-
-    // Validar campos obligatorios
-    if (!Identidad || !P_nombre || !P_apellido || !Email || !Rol || !Ocupacion || !Salario || !Fecha_contratacion) {
-        return res.status(400).send({ error: 'Todos los campos son requeridos.' });
-    }
-
-    // Validar formato de Email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(Email)) {
-        return res.status(400).send({ error: 'El formato del email es inválido.' });
-    }
-
-    let transaction;
+    const transaction = new sql.Transaction(pool);
 
     try {
-        transaction = new sql.Transaction(pool);
         await transaction.begin();
 
         // Validar existencia de email en la tabla Usuarios
-        const existingUserEmail = await pool.request()
+        const existingUserEmail = await transaction.request()
             .input('Email', sql.NVarChar, Email)
             .query('SELECT COUNT(*) as count FROM Usuarios WHERE Email = @Email');
 
         if (existingUserEmail.recordset[0].count > 0) {
-            await transaction.rollback();
-            return res.status(400).send({ error: 'El email ya está registrado.' });
+            throw new Error('El email ya está registrado.');
         }
 
         // Validar existencia de identidad en la tabla Personas
-        const existingIdentity = await pool.request()
+        const existingIdentity = await transaction.request()
             .input('Identidad', sql.NVarChar, Identidad)
             .query('SELECT COUNT(*) as count FROM Personas WHERE Identidad = @Identidad');
 
         if (existingIdentity.recordset[0].count > 0) {
-            await transaction.rollback();
-            return res.status(400).send({ error: 'La identidad ya está registrada.' });
+            throw new Error('La identidad ya está registrada.');
         }
 
         // Generar y hashear la contraseña provisional
@@ -71,18 +56,20 @@ const agregarUsuarioCompleto = async (req, res) => {
         const hashedPassword = await bcrypt.hash(contraseñaProvisional, 10);
 
         // Inserción en la tabla Usuarios
-        const resultUsuario = await pool.request()
+        const resultUsuario = await transaction.request()
             .input('Nombre', sql.NVarChar, Nombre)
             .input('Email', sql.NVarChar, Email)
             .input('Contraseña', sql.NVarChar, hashedPassword)
             .input('Rol', sql.NVarChar, Rol)
-            .input('Primer_ingreso', sql.Bit, Primer_ingreso)
+            .input('Primer_ingreso', sql.Bit, Primer_ingreso === '' ? false : Primer_ingreso)
             .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol, Primer_ingreso) OUTPUT INSERTED.Id_usuario VALUES (@Nombre, @Email, @Contraseña, @Rol, @Primer_ingreso)');
 
         const idUsuario = resultUsuario.recordset[0].Id_usuario;
-
+        
         // Inserción en la tabla Personas
-        await pool.request()
+        await transaction.request()
+
+        
             .input('Identidad', sql.NVarChar, Identidad)
             .input('Id_departamento', sql.Int, parseInt(Id_departamento, 10))
             .input('P_nombre', sql.NVarChar, P_nombre)
@@ -92,12 +79,12 @@ const agregarUsuarioCompleto = async (req, res) => {
             .input('Direccion', sql.NVarChar, Direccion)
             .input('Telefono', sql.NVarChar, Telefono || '')
             .input('Fecha_nac', sql.Date, Fecha_nac)
-            .input('correo', sql.NVarChar, Correo)
+            .input('correo', sql.NVarChar, Email)
             .input('Genero', sql.NVarChar, Genero)
             .query('INSERT INTO Personas (Identidad, Id_departamento, P_nombre, S_nombre, P_apellido, S_apellido, Direccion, Telefono, Fecha_nac, correo, Genero) VALUES (@Identidad, @Id_departamento, @P_nombre, @S_nombre, @P_apellido, @S_apellido, @Direccion, @Telefono, @Fecha_nac, @correo, @Genero)');
 
         // Inserción en la tabla Empleados
-        await pool.request()
+        await transaction.request()
             .input('Identidad', sql.NVarChar, Identidad)
             .input('Ocupacion', sql.NVarChar, Ocupacion)
             .input('Salario', sql.Decimal(10, 2), Salario)
@@ -108,27 +95,11 @@ const agregarUsuarioCompleto = async (req, res) => {
         // Confirmar transacción
         await transaction.commit();
 
-        // Enviar un correo electrónico al usuario con la contraseña provisional
-        const mailOptions = {
-            from: 'autosoft.tallermecanico@gmail.com',
-            to: Email,
-            subject: 'Contraseña Provisional',
-            text: `Hola ${Nombre}, tu contraseña provisional es ${contraseñaProvisional}. Por favor cambia esta contraseña al ingresar a tu cuenta.`
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Error al enviar correo:', error);
-            } else {
-                console.log('Correo enviado:', info.response);
-            }
-        });
-
-        res.status(200).send('Usuario agregado correctamente y correo de contraseña enviado.');
+        res.status(200).send('Usuario agregado correctamente y datos relacionados insertados.');
     } catch (error) {
         console.error('Error al agregar usuario:', error);
         if (transaction) await transaction.rollback();
-        res.status(500).send({ error: 'Error al agregar usuario.' });
+        res.status(500).send({ error: error.message });
     } finally {
         pool.close();
     }
