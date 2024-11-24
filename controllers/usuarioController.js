@@ -25,8 +25,6 @@ const agregarUsuarioCompleto = async (req, res) => {
         Nombre, Email, Rol, Ocupacion, Salario, Fecha_contratacion, Id_departamento, Primer_ingreso
     } = req.body;
 
-    
-
     const pool = await sql.connect(dbConfig);
     const transaction = new sql.Transaction(pool);
 
@@ -68,8 +66,6 @@ const agregarUsuarioCompleto = async (req, res) => {
         
         // Inserción en la tabla Personas
         await transaction.request()
-
-        
             .input('Identidad', sql.NVarChar, Identidad)
             .input('Id_departamento', sql.Int, parseInt(Id_departamento, 10))
             .input('P_nombre', sql.NVarChar, P_nombre)
@@ -94,6 +90,22 @@ const agregarUsuarioCompleto = async (req, res) => {
 
         // Confirmar transacción
         await transaction.commit();
+
+        // Enviar correo electrónico con la contraseña provisional
+        const mailOptions = {
+            from: 'autosoft.tallermecanico@gmail.com',
+            to: Email,
+            subject: 'Contraseña provisional',
+            text: `Hola ${Nombre},\n\nTu contraseña provisional es: ${contraseñaProvisional}\n\nPor favor, cambia tu contraseña después de iniciar sesión.`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error al enviar correo:', error);
+            } else {
+                console.log('Correo enviado:', info.response);
+            }
+        });
 
         res.status(200).send('Usuario agregado correctamente y datos relacionados insertados.');
     } catch (error) {
