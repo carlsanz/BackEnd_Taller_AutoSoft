@@ -126,12 +126,13 @@ const obtenerCitaPorId = async (req, res) => {
 };
 
 const obtenerCitasporEmpleado = async (req, res) => {
-    const { Id_empleados } = req.params; // Extrae directamente el ID del empleado
+    const { idEmpleado } = req.params; // Extrae directamente el ID del empleado
 
+   
     try {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request()
-            .input('Id_empleados', sql.Int, Id_empleados) // Asegúrate de que Id_empleados sea un entero válido
+            .input('Id_empleados', sql.Int, idEmpleado) // Asegúrate de que Id_empleados sea un entero válido
             .query(`
                 SELECT 
                     c.Id_cita, c.Id_cliente, c.Id_empleados, c.Fecha_ingreso, 

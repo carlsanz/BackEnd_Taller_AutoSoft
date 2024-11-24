@@ -43,7 +43,7 @@ router.put('/actEstado/:id', actualizarEstadoCita);
 //Actualizar fecha de las citas
 router.put('/actFecha/:id', actualizarFechaCita);
 
-router.get('/obtener/cita/:IdEmpleado', obtenerCitasporEmpleado);
+router.get('/obtener/cita/:idEmpleado', obtenerCitasporEmpleado);
 
 
 
