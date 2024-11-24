@@ -128,7 +128,6 @@ const obtenerCitaPorId = async (req, res) => {
 const obtenerCitasporEmpleado = async (req, res) => {
     const { idEmpleado } = req.params; // Extrae directamente el ID del empleado
 
-   
     try {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request()
@@ -146,8 +145,9 @@ const obtenerCitasporEmpleado = async (req, res) => {
                 WHERE c.Id_empleados = @Id_empleados
             `); // Filtra por el empleado correspondiente
 
+        // Si no hay citas, devuelve un array vacío con un 200
         if (result.recordset.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron citas para este empleado.' });
+            return res.status(200).json([]); // Devuelve un array vacío
         }
 
         res.status(200).json(result.recordset); // Devuelve las citas encontradas
@@ -156,7 +156,6 @@ const obtenerCitasporEmpleado = async (req, res) => {
         res.status(500).json({ message: 'Error del servidor al obtener las citas.' });
     }
 };
-
 
 // Actualizar una cita
 const actualizarCita = async (req, res) => {
