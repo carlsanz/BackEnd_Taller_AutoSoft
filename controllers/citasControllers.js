@@ -125,6 +125,38 @@ const obtenerCitaPorId = async (req, res) => {
     }
 };
 
+const obtenerCitasporEmpleado = async (req, res) => {
+    const { Id_empleados } = req.params; // Extrae directamente el ID del empleado
+
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input('Id_empleados', sql.Int, Id_empleados) // Asegúrate de que Id_empleados sea un entero válido
+            .query(`
+                SELECT 
+                    c.Id_cita, c.Id_cliente, c.Id_empleados, c.Fecha_ingreso, 
+                    c.Descripcion, c.Id_estado, ec.Nombre AS estado,
+                    a.Placa AS placa, p.P_nombre AS Nombre 
+                FROM Citas c
+                JOIN Autos a ON c.Id_auto = a.Id_auto
+                JOIN Clientes cl ON c.Id_cliente = cl.Id_cliente
+                JOIN Personas p ON cl.Identidad = p.Identidad
+                JOIN Estados_Citas ec ON c.Id_estado = ec.Id_estado
+                WHERE c.Id_empleados = @Id_empleados
+            `); // Filtra por el empleado correspondiente
+
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron citas para este empleado.' });
+        }
+
+        res.status(200).json(result.recordset); // Devuelve las citas encontradas
+    } catch (error) {
+        console.error('Error al obtener las citas:', error);
+        res.status(500).json({ message: 'Error del servidor al obtener las citas.' });
+    }
+};
+
+
 // Actualizar una cita
 const actualizarCita = async (req, res) => {
     const { id } = req.params;
@@ -203,5 +235,6 @@ module.exports = {
     actualizarCita,
     eliminarCita,
     actualizarEstadoCita,
-    actualizarFechaCita
+    actualizarFechaCita,
+    obtenerCitasporEmpleado
 };
