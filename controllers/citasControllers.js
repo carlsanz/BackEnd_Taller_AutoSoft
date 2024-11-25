@@ -157,6 +157,38 @@ const obtenerCitasporEmpleado = async (req, res) => {
     }
 };
 
+const obtenerCitasPorFecha = async (req, res) => {
+    const { fecha } = req.params; // Extrae la fecha de los parámetros
+
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input('Fecha_ingreso', sql.Date, fecha) // Asegúrate de que la fecha sea válida
+            .query(`
+                SELECT 
+                    c.Id_cita, c.Id_cliente, c.Id_empleados, c.Fecha_ingreso, 
+                    c.Descripcion, c.Id_estado, ec.Nombre AS estado,
+                    a.Placa AS placa, p.P_nombre AS Nombre 
+                FROM Citas c
+                JOIN Autos a ON c.Id_auto = a.Id_auto
+                JOIN Clientes cl ON c.Id_cliente = cl.Id_cliente
+                JOIN Personas p ON cl.Identidad = p.Identidad
+                JOIN Estados_Citas ec ON c.Id_estado = ec.Id_estado
+                WHERE c.Fecha_ingreso = @Fecha_ingreso
+            `); // Filtra por la fecha de ingreso
+
+        // Si no hay citas, devuelve un array vacío con un 200
+        if (result.recordset.length === 0) {
+            return res.status(200).json([]); // Devuelve un array vacío
+        }
+
+        res.status(200).json(result.recordset); // Devuelve las citas encontradas
+    } catch (error) {
+        console.error('Error al obtener las citas por fecha:', error);
+        res.status(500).json({ message: 'Error del servidor al obtener las citas.' });
+    }
+};
+
 // Actualizar una cita
 const actualizarCita = async (req, res) => {
     const { id } = req.params;
@@ -236,5 +268,6 @@ module.exports = {
     eliminarCita,
     actualizarEstadoCita,
     actualizarFechaCita,
-    obtenerCitasporEmpleado
+    obtenerCitasporEmpleado,
+    obtenerCitasPorFecha
 };

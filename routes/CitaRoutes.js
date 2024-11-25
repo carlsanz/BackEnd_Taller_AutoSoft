@@ -11,7 +11,8 @@ const {
     obtenerClientesYplaca,
     actualizarEstadoCita,
     actualizarFechaCita,
-    obtenerCitasporEmpleado
+    obtenerCitasporEmpleado,
+    obtenerCitasPorFecha
     
 } = require('../controllers/citasControllers');
 
@@ -44,6 +45,8 @@ router.put('/actEstado/:id', actualizarEstadoCita);
 router.put('/actFecha/:id', actualizarFechaCita);
 
 router.get('/obtener/cita/:idEmpleado', obtenerCitasporEmpleado);
+
+router.get('/fecha/:fecha', obtenerCitasPorFecha );
 
 
 
