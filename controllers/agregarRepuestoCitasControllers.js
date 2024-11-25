@@ -166,6 +166,8 @@ const obtenerRepuestosPorCita = async (req, res) => {
                 INNER JOIN Repuestos R ON I.id_repuesto = R.id_repuesto
                 WHERE RU.id_cita = @id_cita
             `);
+            if (result.recordset.length === 0) {
+                return res.status(200).json([]);}
 
         res.status(200).json(result.recordset);
     } catch (error) {

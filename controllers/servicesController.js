@@ -132,7 +132,6 @@ const asociarServicioConCita = async (req, res) => {
 
     try {
         const pool = await sql.connect(dbConfig);
-
         const result = await pool.request()
             .input('id_cita', sql.Int, id_cita)
             .query(`
@@ -146,7 +145,7 @@ const asociarServicioConCita = async (req, res) => {
             `);
 
         if (result.recordset.length === 0) {
-            return res.status(404).json({ message: 'No se encontraron servicios para esta cita.' });
+            return res.status(200).json([]); // Devuelve un array vacío
         }
 
         res.status(200).json(result.recordset);
