@@ -18,6 +18,8 @@ const citasRouter = require('./routes/CitaRoutes');
 
 const repuestosUtilizadosRoutes = require('./routes/agregarRepuestoCitasRoutes');
 
+const facturaRoutes = require('./routes/facturaRoutes');
+
 
 
 
@@ -41,6 +43,8 @@ app.use('/inventarios', inventarioRoutes );
 app.use('/citas', citasRouter);
 
 app.use('/reputilizado', repuestosUtilizadosRoutes);
+
+app.use('/factura', facturaRoutes); // Prefijo /api
 
 
 
