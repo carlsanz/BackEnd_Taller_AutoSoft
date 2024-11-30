@@ -69,13 +69,28 @@ const obtenerCitas = async (req, res) => {
     try {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request().
-        query(`select c.Id_cita, c.Id_cliente, c.Id_empleados, c.Fecha_ingreso, 
-        c.Descripcion, c.Id_estado, ec.Nombre as estado,
-         a.Placa AS placa, p.P_nombre AS Nombre from Citas c
-        JOIN Autos a ON c.Id_auto=a.Id_auto
-        JOIN Clientes cl ON c.Id_cliente=cl.Id_cliente
-        JOIN Personas p ON cl.Identidad = p.Identidad
-        JOIN Estados_Citas ec ON c.Id_estado=ec.Id_estado`);
+        query(`SELECT 
+                c.Id_cita,
+                c.Fecha_ingreso AS Fecha,
+                c.Descripcion AS Descripcion,
+                a.Placa AS Placa,
+                cli.P_nombre AS Nombre_Cliente,
+                emp.P_nombre AS Nombre_Empleado,
+                ec.Nombre AS Estado
+                    FROM 
+                        Citas c
+                    LEFT JOIN 
+                        Autos a ON c.Id_auto = a.Id_auto
+                    LEFT JOIN 
+                        Clientes cl ON c.Id_cliente = cl.Id_cliente
+                    LEFT JOIN 
+                        Personas cli ON cl.Identidad = cli.Identidad
+                    LEFT JOIN 
+                        Empleados e ON c.Id_empleados = e.Id_empleados
+                    LEFT JOIN 
+                        Personas emp ON e.Identidad = emp.Identidad
+                    LEFT JOIN 
+                        Estados_Citas ec ON c.Id_estado = ec.Id_estado;`);
         res.json(result.recordset);
     } catch (error) {
         console.error("Error al obtener la cita:", error);
@@ -108,22 +123,50 @@ const crearCita = async (req, res) => {
 // Obtener todas las citas
 
 // Obtener una cita por ID
-const obtenerCitaPorId = async (req, res) => {
-    const { id } = req.params;
+const obtenerCitasPorMecanico = async (req, res) => {
+    const { nombre } = req.params; // Capturamos el nombre como parámetro en la URL
     try {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request()
-            .input('Id_cita', sql.Int, id)
-            .query('SELECT * FROM Citas WHERE Id_cita = @Id_cita');
-        
+            .input('NombreEmpleado', sql.NVarChar, `%${nombre}%`) // Usamos LIKE con patrones
+            .query(`
+                SELECT 
+                    c.Id_cita,
+                    c.Fecha_ingreso AS Fecha,
+                    c.Descripcion AS Descripcion,
+                    a.Placa AS Placa,
+                    cli.P_nombre AS Nombre_Cliente,
+                    emp.P_nombre AS Nombre_Empleado,
+                    ec.Nombre AS Estado
+                FROM 
+                    Citas c
+                LEFT JOIN 
+                    Autos a ON c.Id_auto = a.Id_auto
+                LEFT JOIN 
+                    Clientes cl ON c.Id_cliente = cl.Id_cliente
+                LEFT JOIN 
+                    Personas cli ON cl.Identidad = cli.Identidad
+                LEFT JOIN 
+                    Empleados e ON c.Id_empleados = e.Id_empleados
+                LEFT JOIN 
+                    Personas emp ON e.Identidad = emp.Identidad
+                LEFT JOIN 
+                    Estados_Citas ec ON c.Id_estado = ec.Id_estado
+                WHERE 
+                    emp.P_nombre LIKE @NombreEmpleado
+            `);
+
         if (result.recordset.length === 0) {
-            return res.status(404).json({ mensaje: 'Cita no encontrada' });
+            return res.status(404).json({ mensaje: 'No se encontraron citas para el mecánico especificado.' });
         }
-        res.json(result.recordset[0]);
+
+        res.json(result.recordset);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const obtenerCitasporEmpleado = async (req, res) => {
     const { idEmpleado } = req.params; // Extrae directamente el ID del empleado
@@ -263,7 +306,7 @@ module.exports = {
     crearCita,
     obtenerCitas,
     obtenerClientesYplaca,
-    obtenerCitaPorId,
+    obtenerCitasPorMecanico,
     actualizarCita,
     eliminarCita,
     actualizarEstadoCita,
