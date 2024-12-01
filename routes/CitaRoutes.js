@@ -5,7 +5,7 @@ const {
     obtenerEstados,
     obtenerCitas,
     crearCita,
-    obtenerCitaPorId,
+    obtenerCitasPorMecanico,
     actualizarCita,
     eliminarCita,
     obtenerClientesYplaca,
@@ -23,7 +23,7 @@ router.post('/', crearCita);
 router.get('/obtener', obtenerCitas);
 
 // Obtener una cita por ID
-router.get('/obtener/:id', obtenerCitaPorId);
+router.get('/mecanico/:nombre', obtenerCitasPorMecanico);
 
 // Actualizar una cita
 router.put('/:id', actualizarCita);
