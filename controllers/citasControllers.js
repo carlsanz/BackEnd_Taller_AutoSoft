@@ -243,6 +243,20 @@ const actualizarEstadoCita = async (req, res) => {
     }
 };
 
+
+
+// obtener el listado de los estados con su id cita
+const obtenerEstadosCitas = async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request().query('SELECT Id_cita, Id_estado from Citas');
+        res.json(result.recordset);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 // Eliminar una cita
 const eliminarCita = async (req, res) => {
     const { id } = req.params;
@@ -269,5 +283,6 @@ module.exports = {
     actualizarEstadoCita,
     actualizarFechaCita,
     obtenerCitasporEmpleado,
-    obtenerCitasPorFecha
+    obtenerCitasPorFecha,
+    obtenerEstadosCitas
 };
