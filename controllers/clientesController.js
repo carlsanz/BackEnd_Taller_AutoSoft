@@ -50,6 +50,43 @@ const obtenerDepartamentos = async (req, res) => {
         res.status(500).send('Error al obtener los departamentos');
     }
 };
+
+// Endpoint para obtener los clientes
+const obtenerClientes = async (req, res) => {
+    try {
+        // Crear una conexión a SQL Server
+        const pool = await sql.connect(dbConfig);
+
+        // Ejecutar la consulta para obtener los clientes  
+        const result = await pool.request()
+            .query(`
+                SELECT 
+                    p.Identidad, 
+                    p.Id_departamento, 
+                    p.P_nombre, 
+                    p.S_nombre, 
+                    p.P_apellido, 
+                    p.S_apellido, 
+                    p.Direccion, 
+                    p.Telefono, 
+                    p.Fecha_nac, 
+                    p.correo, 
+                    p.Genero
+                FROM 
+                    Clientes 
+                INNER JOIN 
+                    Personas p 
+                ON 
+                    Clientes.Identidad = p.Identidad
+            `);
+
+        // Devolver el resultado de la consulta
+        res.json(result.recordset);
+    } catch (error) {
+        console.error('Error al obtener clientes:', error.message);
+        res.status(500).send('Error al obtener los clientes');
+    }
+};
 // agregar cliente
 
 const agregarCliente = async (req, res) => {
@@ -212,4 +249,11 @@ const eliminarCliente = async (req, res) => {
         res.status(500).send('Error al eliminar el cliente');
     }
 };
-module.exports = { ObtenerEmpleadosId, obtenerDepartamentos, agregarCliente, buscarClientePorIdentidad, actualizarCliente, eliminarCliente, obtenerTodosLosClientes };
+module.exports = { ObtenerEmpleadosId, 
+                obtenerDepartamentos, 
+                agregarCliente, 
+                buscarClientePorIdentidad, 
+                actualizarCliente, 
+                eliminarCliente, 
+                obtenerTodosLosClientes,
+                obtenerClientes };
