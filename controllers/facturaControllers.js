@@ -70,6 +70,32 @@ const guardarFactura = async (Id_cita, Subtotal, impuesto, total) => {
         `);
 };
 
+const obtenerFacturaPorId = async (Id_factura) => {
+    const pool = await sql.connect(dbConfig);
+
+    // Obtener los datos completos de la factura
+    const result = await pool.request()
+        .input('Id_factura', sql.Int, Id_factura)
+        .query(`
+            SELECT 
+                F.Id_factura,
+                F.Id_cita,
+                F.Fecha,
+                F.Subtotal,
+                F.Impuesto,
+                F.Total,
+                C.Fecha AS Fecha_Cita,
+                C.Descripcion,
+                EC.Nombre AS Estado_Cita
+            FROM Factura F
+            INNER JOIN Citas C ON F.Id_cita = C.Id_cita
+            INNER JOIN Estados_Citas EC ON C.Id_estado = EC.Id_estado
+            WHERE F.Id_factura = @Id_factura
+        `);
+
+    return result.recordset[0];
+};
+
 // Controlador para generar y guardar la factura
 const generarFactura = async (req, res) => {
     const { Id_cita } = req.params;
@@ -99,6 +125,7 @@ const generarFactura = async (req, res) => {
 
         // Calcular los datos de la factura
         const { Subtotal, impuesto, total } = await calcularFactura(Id_cita);
+        const{Id_factura}=await obtenerFacturaPorId(Id_cita)
 
         // Guardar la factura en la base de datos
         await guardarFactura(Id_cita, Subtotal, impuesto, total);
@@ -107,6 +134,7 @@ const generarFactura = async (req, res) => {
         return res.json({
             message: 'Factura generada y guardada con éxito',
             datosFactura: {
+                Id_factura,
                 Id_cita,
                 Subtotal,
                 Impuesto: impuesto,

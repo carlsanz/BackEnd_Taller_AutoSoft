@@ -29,7 +29,7 @@ router.get('/mecanico/:nombre', obtenerCitasPorMecanico);
 router.put('/:id', actualizarCita);
 
 // Eliminar una cita
-router.delete('/:id', eliminarCita);
+router.delete('/eliminar/:idCitaSeleccionada', eliminarCita);
 
 // Buscar automóvil por placa
 router.get('/placa/:placa', buscarAutoPorPlaca);

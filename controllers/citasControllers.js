@@ -304,15 +304,27 @@ const obtenerEstadosCitas = async (req, res) => {
 const eliminarCita = async (req, res) => {
     const { id } = req.params;
     try {
+        console.log('Eliminando cita con Id_cita:', id);
+        
         const pool = await sql.connect(dbConfig);
-        await pool.request()
+        const result = await pool.request()
             .input('Id_cita', sql.Int, id)
             .query('DELETE FROM Citas WHERE Id_cita = @Id_cita');
-        res.json({ mensaje: 'Cita eliminada exitosamente' });
+        
+        console.log('Resultado del DELETE:', result); // Agrega este log
+        
+        if (result.rowsAffected[0] > 0) {
+            res.json({ mensaje: 'Cita eliminada exitosamente' });
+        } else {
+            res.status(404).json({ error: 'Cita no encontrada' });
+        }
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Error al eliminar la cita:', error.message); // Log de errores
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
 };
+
+
 
 module.exports = {
     buscarAutoPorPlaca,
