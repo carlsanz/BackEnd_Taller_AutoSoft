@@ -1,10 +1,10 @@
 const express = require('express');
-const { generarFactura, obtenerFacturaPorId } = require('../controllers/facturaControllers');
+const { generarFactura } = require('../controllers/facturaControllers');
 const router = express.Router();
 
 // Ruta para generar la factura
 router.post('/generar/:Id_cita', generarFactura);
-router.get('/factura/:Id_cita', obtenerFacturaPorId);
+
 
 
 module.exports = router;

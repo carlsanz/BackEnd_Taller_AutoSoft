@@ -175,7 +175,6 @@ const generarFactura = async (req, res) => {
 
         // Calcular los datos de la factura
         const { Subtotal, impuesto, total } = await calcularFactura(Id_cita);
-        const{Id_factura}=await obtenerFacturaPorId(Id_cita)
 
         // Obtener la fecha actual
         const fecha = new Date();
@@ -187,7 +186,6 @@ const generarFactura = async (req, res) => {
         return res.json({
             message: 'Factura generada y guardada con éxito',
             datosFactura: {
-                Id_factura,
                 Id_cita,
                 Subtotal,
                 Impuesto: impuesto,
