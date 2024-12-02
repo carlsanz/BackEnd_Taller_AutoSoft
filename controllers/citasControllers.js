@@ -286,19 +286,45 @@ const actualizarEstadoCita = async (req, res) => {
     }
 };
 
-// Eliminar una cita
-const eliminarCita = async (req, res) => {
-    const { id } = req.params;
+
+
+// obtener el listado de los estados con su id cita
+const obtenerEstadosCitas = async (req, res) => {
     try {
         const pool = await sql.connect(dbConfig);
-        await pool.request()
-            .input('Id_cita', sql.Int, id)
-            .query('DELETE FROM Citas WHERE Id_cita = @Id_cita');
-        res.json({ mensaje: 'Cita eliminada exitosamente' });
+        const result = await pool.request().query('SELECT Id_cita, Id_estado from Citas');
+        res.json(result.recordset);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+// Eliminar una cita
+const eliminarCita = async (req, res) => {
+    const { id } = req.params;
+    try {
+        console.log('Eliminando cita con Id_cita:', id);
+        
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input('Id_cita', sql.Int, id)
+            .query('DELETE FROM Citas WHERE Id_cita = @Id_cita');
+        
+        console.log('Resultado del DELETE:', result); // Agrega este log
+        
+        if (result.rowsAffected[0] > 0) {
+            res.json({ mensaje: 'Cita eliminada exitosamente' });
+        } else {
+            res.status(404).json({ error: 'Cita no encontrada' });
+        }
+    } catch (error) {
+        console.error('Error al eliminar la cita:', error.message); // Log de errores
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
+
 
 module.exports = {
     buscarAutoPorPlaca,
@@ -312,5 +338,6 @@ module.exports = {
     actualizarEstadoCita,
     actualizarFechaCita,
     obtenerCitasporEmpleado,
-    obtenerCitasPorFecha
+    obtenerCitasPorFecha,
+    obtenerEstadosCitas
 };

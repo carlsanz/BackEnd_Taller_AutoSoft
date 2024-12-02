@@ -12,7 +12,8 @@ const {
     actualizarEstadoCita,
     actualizarFechaCita,
     obtenerCitasporEmpleado,
-    obtenerCitasPorFecha
+    obtenerCitasPorFecha,
+    obtenerEstadosCitas
     
 } = require('../controllers/citasControllers');
 
@@ -28,7 +29,7 @@ router.get('/mecanico/:nombre', obtenerCitasPorMecanico);
 router.put('/:id', actualizarCita);
 
 // Eliminar una cita
-router.delete('/:id', eliminarCita);
+router.delete('/eliminar/:idCitaSeleccionada', eliminarCita);
 
 // Buscar automóvil por placa
 router.get('/placa/:placa', buscarAutoPorPlaca);
@@ -47,6 +48,10 @@ router.put('/actFecha/:id', actualizarFechaCita);
 router.get('/obtener/cita/:idEmpleado', obtenerCitasporEmpleado);
 
 router.get('/fecha/:fecha', obtenerCitasPorFecha );
+
+
+
+router.get('/citasEstados', obtenerEstadosCitas);
 
 
 

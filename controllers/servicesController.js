@@ -14,6 +14,21 @@ const obtenerServiciosXcita = async (req, res) => {
   };
 
 
+  const eliminarServicio = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const pool = await sql.connect(dbConfig);
+        await pool.request()
+            .input('Id_repuesto', sql.Int, id)
+            .query('DELETE FROM Servicios WHERE Id_servicio = @Id_servicio');
+        res.json({ mensaje: 'Servicio eliminado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
 const obtenerServicios = async (req, res) => {
     try {
         const pool = await sql.connect(dbConfig);
@@ -195,5 +210,5 @@ const eliminarServicioDeCita = async (req, res) => {
   }
 };
 
-module.exports = { obtenerServicios, agregarServicio,  actualizarServicio, obtenerServiciosXcita, asociarServicioConCita, obtenerServiciosPorCita, eliminarServicioDeCita };
+module.exports = { obtenerServicios, eliminarServicio, agregarServicio,  actualizarServicio, obtenerServiciosXcita, asociarServicioConCita, obtenerServiciosPorCita, eliminarServicioDeCita };
 
