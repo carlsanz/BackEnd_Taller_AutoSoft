@@ -5,7 +5,8 @@ const { obtenerDepartamentos,
     actualizarCliente,
     eliminarCliente,
     ObtenerEmpleadosId,
-    obtenerTodosLosClientes} = require('../controllers/clientesController');
+    obtenerTodosLosClientes,
+    obtenerClientes} = require('../controllers/clientesController');
 
 
 const router = express.Router();
@@ -28,6 +29,8 @@ router.delete('/clientes/:identidad', eliminarCliente);
 router.get('/todos',obtenerTodosLosClientes);
 
 router.get('/clientes/:id', ObtenerEmpleadosId);
+
+router.get('/clientesTodo', obtenerClientes);
 
 
 module.exports = router;

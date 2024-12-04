@@ -51,14 +51,14 @@ const obtenerClientesYplaca = async (req, res) => {
             .query("SELECT Personas.P_nombre, Personas.P_apellido, FROM Personas ");
         
             const autoResult = await pool.request()
-           .query("SELECT Placa, Id_modelo, Id_tipo, Id_color FROM Autos");
+            .query("SELECT Placa, Id_modelo, Id_tipo, Id_color FROM Autos");
         
-         res.json({
+            res.json({
             Nombre: personaResult.recordset,
             cliente:cientesResult.recordset,
             placa: autoResult.recordset
 
-         })
+        })
     } catch (error) {
         console.error('Error al obtener los clientes y autos:', error);
         res.status(500).send('Error al obtener los clientes');
@@ -324,6 +324,37 @@ const eliminarCita = async (req, res) => {
     }
 };
 
+/*const ObtenerCitasHoy= async (req, res) => {
+    try {
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const query = `
+            SELECT * FROM Citas 
+            WHERE CAST(Fecha_ingreso AS DATE) = ?;
+        `; // Reemplaza 'Citas' con el nombre real de tu tabla
+        const citas = await db.query(query, [formattedDate]);
+        res.json(citas);
+    } catch (error) {
+        console.error('Error al obtener las citas del día:', error);
+        res.status(500).json({ error: 'Error al obtener citas del día.' });
+    }
+};*/
+
+const ObtenerCantCitasHoy = async(req, res)=>{
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request().query( `
+            SELECT COUNT(*) AS cantidad 
+            FROM Citas 
+            WHERE CAST(Fecha_ingreso AS DATE) = CAST(GETDATE() AS DATE)
+        `);
+        res.json({ cantidad: result[0].cantidad });
+    } catch (error) {
+        console.error("Error al obtener las citas del dia:", error);
+        res.status(500).json({ error: 'Error al contar citas del día.' });
+    }
+}
+
 
 
 module.exports = {
@@ -339,5 +370,8 @@ module.exports = {
     actualizarFechaCita,
     obtenerCitasporEmpleado,
     obtenerCitasPorFecha,
-    obtenerEstadosCitas
+    obtenerEstadosCitas,
+   // ObtenerCitasHoy,
+    ObtenerCantCitasHoy
+    
 };

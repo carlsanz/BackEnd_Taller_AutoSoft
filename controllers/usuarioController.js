@@ -269,12 +269,13 @@ async function obtenerEmpleados(req, res) {
     try {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request().query(`
-            SELECT 
+            	SELECT 
                 p.Identidad,
                 p.P_nombre,
                 p.S_nombre,
                 p.P_apellido,
                 p.S_apellido,
+				p.correo,
                 p.Genero,
                 p.Direccion
             FROM Empleados e
@@ -286,6 +287,7 @@ async function obtenerEmpleados(req, res) {
             Identidad: empleado.Identidad,
             Nombre: `${empleado.P_nombre} ${empleado.S_nombre}`,
             Apellido: `${empleado.P_apellido} ${empleado.S_apellido}`,
+            Email: empleado.correo,
             Genero: empleado.Genero,
             Direccion: empleado.Direccion,
         }));
@@ -305,3 +307,4 @@ module.exports = {
     eliminarUsuario,
     obtenerEmpleados
 };
+
