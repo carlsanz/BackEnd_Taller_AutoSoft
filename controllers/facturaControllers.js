@@ -203,4 +203,172 @@ const generarFactura = async (req, res) => {
     }
 };
 
-module.exports = { generarFactura };
+
+const obtenerFacturasSiEsMecanico = async (req, res) => {
+    const { Id_empleado } = req.params; // Recibimos el ID del empleado como parámetro
+
+    try {
+        const pool = await sql.connect(dbConfig);
+
+        // Verificar si el empleado tiene el rol "Mecánico"
+        const rolResult = await pool.request()
+    .input('Id_empleado', sql.Int, Id_empleado)
+    .query(`
+        SELECT U.Rol AS RolEmpleado
+        FROM Empleados E
+        INNER JOIN Usuarios U ON E.Id_usuario = U.Id_usuario
+        WHERE E.Id_empleados = @Id_empleado
+    `);
+
+const rolEmpleado = rolResult.recordset[0];
+
+if (!rolEmpleado) {
+    return res.status(404).json({ 
+        message: 'Empleado no encontrado' 
+    });
+}
+
+if (rolEmpleado.RolEmpleado !== 'Mecanico') {
+    return res.status(403).json({ 
+        message: 'El empleado no tiene el rol de Mecánico', 
+    });
+}
+
+        // Obtener las facturas asociadas al mecánico
+        const facturasResult = await pool.request()
+            .input('Id_empleado', sql.Int, Id_empleado)
+            .query(`
+                SELECT 
+                    F.Id_cita,
+                    F.Subtotal,
+                    F.Impuesto,
+                    F.Total,
+                    F.Fecha
+                FROM Factura F
+                INNER JOIN Citas C ON F.Id_cita = C.Id_cita
+                WHERE C.Id_empleados = @Id_empleado
+            `);
+
+        const facturas = facturasResult.recordset;
+
+        if (facturas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron facturas para este mecánico' });
+        }
+
+        // Preparar los datos detallados para cada factura
+        const datosFacturas = await Promise.all(
+            facturas.map(async (factura) => {
+                const cliente = await obtenerClientePorCita(factura.Id_cita);
+                const empleado = await obtenerEmpleadoPorCita(factura.Id_cita);
+                const repuestos = await obtenerRepuestosPorCita(factura.Id_cita);
+                const servicios = await obtenerServiciosPorCita(factura.Id_cita);
+
+                return {
+                    Id_cita: factura.Id_cita,
+                    Subtotal: factura.Subtotal,
+                    Impuesto: factura.Impuesto,
+                    Total: factura.Total,
+                    Fecha: factura.Fecha.toISOString(),
+                    cliente,
+                    empleado,
+                    repuestos,
+                    servicios,
+                };
+            })
+        );
+
+        // Responder con las facturas detalladas
+        return res.json({
+            message: 'Facturas obtenidas con éxito',
+            datosFacturas,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al obtener las facturas', error });
+    }
+};
+
+const obtenerFacturasSiEsAdministrador = async (req, res) => {
+    const { Id_empleado } = req.params; // Recibimos el ID del empleado como parámetro
+
+    try {
+        const pool = await sql.connect(dbConfig);
+
+        // Verificar si el empleado tiene el rol "Administrador"
+        const rolResult = await pool.request()
+            .input('Id_empleado', sql.Int, Id_empleado)
+            .query(`
+                SELECT U.Rol AS RolEmpleado
+                FROM Empleados E
+                INNER JOIN Usuarios U ON E.Id_usuario = U.Id_usuario
+                WHERE E.Id_empleados = @Id_empleado
+            `);
+
+        // Depurar el resultado
+        
+
+        const rolEmpleado = rolResult.recordset[0];
+
+        if (!rolEmpleado) {
+            return res.status(404).json({ 
+                message: 'Empleado no encontrado' 
+            });
+        }
+
+        if (rolEmpleado.RolEmpleado !== 'Administrador') {
+            return res.status(403).json({ 
+                message: 'El empleado no tiene el rol de Administrador', 
+            });
+        }
+
+        // Obtener todas las facturas de la tabla Factura
+        const facturasResult = await pool.request().query(`
+            SELECT 
+                F.Id_cita,
+                F.Subtotal,
+                F.Impuesto,
+                F.Total,
+                F.Fecha
+            FROM Factura F
+        `);
+
+        const facturas = facturasResult.recordset;
+
+        if (facturas.length === 0) {
+            return res.status(404).json({ message: 'No se encontraron facturas' });
+        }
+
+        // Preparar los datos detallados para cada factura
+        const datosFacturas = await Promise.all(
+            facturas.map(async (factura) => {
+                const cliente = await obtenerClientePorCita(factura.Id_cita);
+                const empleado = await obtenerEmpleadoPorCita(factura.Id_cita);
+                const repuestos = await obtenerRepuestosPorCita(factura.Id_cita);
+                const servicios = await obtenerServiciosPorCita(factura.Id_cita);
+
+                return {
+                    Id_cita: factura.Id_cita,
+                    Subtotal: factura.Subtotal,
+                    Impuesto: factura.Impuesto,
+                    Total: factura.Total,
+                    Fecha: factura.Fecha.toISOString(),
+                    cliente,
+                    empleado,
+                    repuestos,
+                    servicios,
+                };
+            })
+        );
+
+        // Responder con las facturas detalladas
+        return res.json({
+            message: 'Facturas obtenidas con éxito',
+            datosFacturas,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al obtener las facturas', error });
+    }
+};
+
+module.exports = { generarFactura , obtenerFacturasSiEsMecanico, obtenerFacturasSiEsAdministrador };
