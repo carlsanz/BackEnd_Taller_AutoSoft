@@ -15,7 +15,7 @@ const {
     obtenerCitasPorFecha,
     obtenerEstadosCitas,
     //ObtenerCitasHoy,
-    ObtenerCantCitasHoy
+    //ObtenerCantCitasHoy
     
 } = require('../controllers/citasControllers');
 
@@ -53,7 +53,7 @@ router.get('/fecha/:fecha', obtenerCitasPorFecha );
 
 //router.get('/hoy', ObtenerCitasHoy );
 
-router.get('/hoy/cantidad', ObtenerCantCitasHoy );
+//router.get('/hoy/cantidad', ObtenerCantCitasHoy );
 
 router.get('/citasEstados', obtenerEstadosCitas);
 

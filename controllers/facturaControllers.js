@@ -147,6 +147,15 @@ const generarFactura = async (req, res) => {
     try {
         const pool = await sql.connect(dbConfig);
 
+        // Verificar si ya existe una factura para la cita
+        const facturaExistenteResult = await pool.request()
+            .input('Id_cita', sql.Int, Id_cita)
+            .query('SELECT COUNT(*) AS FacturaCount FROM Factura WHERE Id_cita = @Id_cita');
+        
+        if (facturaExistenteResult.recordset[0].FacturaCount > 0) {
+            return res.status(400).json({ message: 'Ya se ha generado una factura para esta cita.' });
+        }
+
         // Verificar el estado de la cita
         const estadoResult = await pool.request()
             .input('Id_cita', sql.Int, Id_cita)
@@ -199,7 +208,7 @@ const generarFactura = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error al generar la factura', error });
+        return res.status(500).json({ message: 'Error al generar la factura', error });
     }
 };
 

@@ -110,20 +110,36 @@ const updateAutoByPlate = async (req, res) => {
 // Eliminar auto por placa
 const deleteAutoByPlate = async (req, res) => {
     const { placa } = req.params;
+
     try {
         const pool = await sql.connect(dbConfig);
+
+        // Verificar si el auto está asociado a alguna cita
+        const checkCitasResult = await pool.request()
+            .input('placa', sql.VarChar, placa)
+            .query('SELECT COUNT(*) AS CitasCount FROM Citas WHERE Id_auto IN (SELECT Id_auto FROM Autos WHERE Placa = @placa)');
+
+        if (checkCitasResult.recordset[0].CitasCount > 0) {
+            // Si hay citas asociadas, no permitir la eliminación
+            return res.status(400).json({
+                message: 'No se puede eliminar el auto porque está asociado a una o más citas.'
+            });
+        }
+
+        // Si no hay citas asociadas, proceder con la eliminación
         const result = await pool.request()
             .input('placa', sql.VarChar, placa)
             .query('DELETE FROM Autos WHERE Placa = @placa');
-        
+
         if (result.rowsAffected[0] === 0) {
             return res.status(404).json({ message: 'Auto no encontrado' });
         }
 
         return res.json({ message: 'Auto eliminado con éxito' });
+
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Error al eliminar el auto' });
+        console.error('Error al eliminar el auto:', err); // Detalle más claro sobre el error
+        return res.status(500).json({ message: 'Error al eliminar el auto', error: err.message || err }); // Devuelvo el mensaje completo de error
     }
 };
 

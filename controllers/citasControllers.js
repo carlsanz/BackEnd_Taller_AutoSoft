@@ -340,20 +340,20 @@ const eliminarCita = async (req, res) => {
     }
 };*/
 
-const ObtenerCantCitasHoy = async(req, res)=>{
-    try {
-        const pool = await sql.connect(dbConfig);
-        const result = await pool.request().query( `
-            SELECT COUNT(*) AS cantidad 
-            FROM Citas 
-            WHERE CAST(Fecha_ingreso AS DATE) = CAST(GETDATE() AS DATE)
-        `);
-        res.json({ cantidad: result[0].cantidad });
-    } catch (error) {
-        console.error("Error al obtener las citas del dia:", error);
-        res.status(500).json({ error: 'Error al contar citas del día.' });
-    }
-}
+// const ObtenerCantCitasHoy = async(req, res)=>{
+//     try {
+//         const pool = await sql.connect(dbConfig);
+//         const result = await pool.request().query( `
+//             SELECT COUNT(*) AS cantidad 
+//             FROM Citas 
+//             WHERE CAST(Fecha_ingreso AS DATE) = CAST(GETDATE() AS DATE)
+//         `);
+//         res.json({ cantidad: result[0].cantidad });
+//     } catch (error) {
+//         console.error("Error al obtener las citas del dia:", error);
+//         res.status(500).json({ error: 'Error al contar citas del día.' });
+//     }
+// }
 
 
 
@@ -372,6 +372,6 @@ module.exports = {
     obtenerCitasPorFecha,
     obtenerEstadosCitas,
    // ObtenerCitasHoy,
-    ObtenerCantCitasHoy
+    //ObtenerCantCitasHoy
     
 };
