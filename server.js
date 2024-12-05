@@ -19,11 +19,14 @@ const citasRouter = require('./routes/CitaRoutes');
 const repuestosUtilizadosRoutes = require('./routes/agregarRepuestoCitasRoutes');
 
 const facturaRoutes = require('./routes/facturaRoutes');
+const empleadosRoutes = require('./routes/empleadosRoutes');
 
 
 
 
 const app = express();
+
+
 app.use(cors()); // Middleware de CORS debe estar antes de las rutas
 app.use(express.json()); // Middleware para parsear el JSON
 
@@ -45,6 +48,8 @@ app.use('/citas', citasRouter);
 app.use('/reputilizado', repuestosUtilizadosRoutes);
 
 app.use('/factura', facturaRoutes); // Prefijo /api
+
+app.use('/api/empleados', empleadosRoutes);
 
 
 
@@ -77,11 +82,11 @@ app.put('/api/usuarios/Primer_ingreso', async (req, res) => {
  /*async function crearUsuarios() {
    try {
        const pool = await sql.connect(dbConfig); // Asegúrate de que dbConfig esté definido correctamente
-       const hashedPassword = await bcrypt.hash('541', 10); // Cambia 'nueva_contraseña' según sea necesario
+       const hashedPassword = await bcrypt.hash('contra', 10); // Cambia 'nueva_contraseña' según sea necesario
 
        await pool.request()
-           .input('Nombre', sql.NVarChar, 'Admin User')
-           .input('Email', sql.NVarChar, 'lisbeth@gmail.com')
+           .input('Nombre', sql.NVarChar, 'Juanito')
+           .input('Email', sql.NVarChar, 'Juanito.arcoiris2@gmail.com')
            .input('Contraseña', sql.NVarChar, hashedPassword)
            .input('Rol', sql.NVarChar, 'Administrador')
            .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol) VALUES (@Nombre, @Email, @Contraseña, @Rol)');
