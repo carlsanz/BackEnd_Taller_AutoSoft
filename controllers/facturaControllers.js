@@ -186,7 +186,8 @@ const generarFactura = async (req, res) => {
         const { Subtotal, impuesto, total } = await calcularFactura(Id_cita);
 
         // Obtener la fecha actual
-        const fecha = new Date();
+        const fechaLocal = new Date();
+        const fecha = new Date(fechaLocal.getTime() - fechaLocal.getTimezoneOffset()*60000);
 
         // Guardar la factura en la base de datos
         await guardarFactura(Id_cita, Subtotal, impuesto, total, fecha);
@@ -380,4 +381,25 @@ const obtenerFacturasSiEsAdministrador = async (req, res) => {
     }
 };
 
-module.exports = { generarFactura , obtenerFacturasSiEsMecanico, obtenerFacturasSiEsAdministrador };
+//Eliminacion de factura 
+const eliminarFactura = async (req, res) => {
+    const { Id_cita } = req.params;
+
+    try {
+        const pool = await sql.connect(dbConfig);
+
+        // Eliminar el cliente de la tabla Clientes usando Identidad
+        await pool.request()
+            .input('Id_cita', sql.NVarChar, Id_cita)
+            .query('DELETE FROM Factura WHERE Id_cita = @Id_cita');
+
+        // No es necesario eliminar de la tabla Personas ya que existe un trigger que se encargará de eso
+
+        res.status(200).send('Factura eliminada correctamente');
+    } catch (error) {
+        console.error('Error al eliminar factura:', error);
+        res.status(500).send('Error al eliminar la factura');
+    }
+};
+
+module.exports = { generarFactura , obtenerFacturasSiEsMecanico, obtenerFacturasSiEsAdministrador, eliminarFactura };
