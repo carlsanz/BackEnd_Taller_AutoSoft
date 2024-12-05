@@ -101,16 +101,39 @@ const eliminarInventario = async (req, res) => {
 
     try {
         const pool = await sql.connect(dbConfig);
+
+        // Verificar si el inventario está en uso y obtener las placas de los autos involucrados
+        const result = await pool.request()
+            .input("Id_inventario", sql.Int, id)
+            .query(`
+                SELECT a.Placa
+                FROM Repuesto_Utilizado ru
+                JOIN Citas c ON ru.Id_cita = c.Id_cita
+                JOIN Autos a ON c.Id_auto = a.Id_auto
+                WHERE ru.Id_inventario = @Id_inventario
+            `);
+
+        // Si el inventario está en uso, devolver las placas de los autos
+        if (result.recordset.length > 0) {
+            const placas = result.recordset.map(row => row.Placa).join(", ");
+            return res.status(400).json({
+                message: `No se puede eliminar el inventario porque se está utilizando en la(s) cita(s) del(los) carro(s) con placa(s): ${placas}`
+            });
+        }
+
+        // Eliminar inventario si no está en uso
         await pool.request()
             .input("Id_inventario", sql.Int, id)
             .query("DELETE FROM Inventarios WHERE Id_inventario = @Id_inventario");
-            
+
         res.status(200).json({ message: "Inventario eliminado correctamente" });
     } catch (error) {
-        console.error("Error al eliminar el inventario:", error);
         res.status(500).json({ message: "Error al eliminar el inventario" });
     }
 };
+
+
+
 
 module.exports = {
     getMarcasYProveedores,
