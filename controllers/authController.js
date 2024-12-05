@@ -42,7 +42,6 @@ const login = async (req, res) => {
 
         // Respuesta al frontend con los datos necesarios
         return res.status(200).json({
-            message: 'Login exitoso',
             nombre: user.Nombre,
             role: user.Rol,
             primerIngreso,

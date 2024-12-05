@@ -70,8 +70,8 @@ app.put('/api/usuarios/Primer_ingreso', async (req, res) => {
 //asdf1234
 
 //Administrador
-//admin@example.com
-//nueva_contraseña
+//lisbeth@gmail.com
+//contra
 
 
  /*async function crearUsuarios() {
@@ -81,7 +81,7 @@ app.put('/api/usuarios/Primer_ingreso', async (req, res) => {
 
        await pool.request()
            .input('Nombre', sql.NVarChar, 'Admin User')
-           .input('Email', sql.NVarChar, 'admin@gmail.com')
+           .input('Email', sql.NVarChar, 'lisbeth@gmail.com')
            .input('Contraseña', sql.NVarChar, hashedPassword)
            .input('Rol', sql.NVarChar, 'Administrador')
            .query('INSERT INTO Usuarios (Nombre, Email, Contraseña, Rol) VALUES (@Nombre, @Email, @Contraseña, @Rol)');
@@ -90,8 +90,8 @@ app.put('/api/usuarios/Primer_ingreso', async (req, res) => {
    } catch (error) {
        console.error('Error al crear usuario:', error);
    }
- }
+ }*/
 
- crearUsuarios();*/
+ //crearUsuarios();
 
 
